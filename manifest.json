@@ -1,0 +1,16 @@
+{
+    "manifest_version": 3,
+    "name": "Mi Extensión",
+    "version": "1.0",
+    "description": "Una extensión para enviar datos a Django",
+    "permissions": [
+        "storage",
+        "activeTab"
+    ],
+    "host_permissions": [
+        "http://localhost:8000/*"
+    ],
+    "action": {
+        "default_popup": "popup.html"
+    }
+}
