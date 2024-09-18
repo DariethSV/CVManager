@@ -11,11 +11,12 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
-
+import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+MEDIA_URL = '/media/'  # URL de acceso a los archivos
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
@@ -38,7 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
-    'save',
+    'data',
+    'access',
+    'resumes_manage',
 ]
 
 MIDDLEWARE = [
@@ -50,6 +53,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'csp.middleware.CSPMiddleware',
 ]
 
 ROOT_URLCONF = 'cvmanager.urls'
@@ -127,6 +131,26 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS = True
 
+CORS_ALLOW_CREDENTIALS = True
+CORS_ORIGIN_WHITELIST = [
+    'http://localhost:8000', 
+]
+
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
 ]
+CSRF_TRUSTED_ORIGINS = [
+    'chrome-extension://ceifglbmciaiimjnoclldhmdjehpeono',
+]
+
+AUTHENTICATION_BACKENDS = [
+    'access.backends.Email_Backend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+AUTH_USER_MODEL = 'access.Custom_User'
+
+LOGIN_URL = '/login/'  # URL donde se redirige si no está autenticado
+LOGIN_REDIRECT_URL = '/'  # Redirección después de iniciar sesión
+CSP_SCRIPT_SRC = ("'self'", 'https://stackpath.bootstrapcdn.com', 'https://code.jquery.com', 'https://cdn.jsdelivr.net')
+CSP_STYLE_SRC = ("'self'", 'https://stackpath.bootstrapcdn.com')
+
