@@ -37,26 +37,32 @@ function detect_forms() {
     });
 }
 
+
 function fill_input(input) {
-    fetch('http://localhost:8000/api/get_data/')
-        .then(response => response.json())
-        .then(data => {
-            const resume_data = data.resume_data[0]; // Obtener el primer objeto del array
-            if (resume_data) {
-                const key = (input.name).toLowerCase(); // Usar name o id del input para buscar en los datos del servidor
-                if (key && resume_data[key] !== undefined) {
-                    // Si existe un valor para la key en los datos del servidor
-                    input.value = resume_data[key];
-                } else {
-                    alert(`No se encontró un valor para "${key}" en los datos.`);
-                }
+    fetch('http://localhost:8000/api/get_data/', {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': csrf_token // Incluir el token CSRF en el header
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const resume_data = data.resume_data[0];
+        if (resume_data) {
+            const key = (input.name).toLowerCase();
+            if (key && resume_data[key] !== undefined) {
+                input.value = resume_data[key];
+            } else {
+                alert(`No se encontró un valor para "${key}" en los datos.`);
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Hubo un error al cargar los datos. Por favor, intenta de nuevo.');
-        });
-}
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Hubo un error al cargar los datos. Por favor, intenta de nuevo.');
+    });
+    }
+
 
 // Llama a la función para detectar formularios
 detect_forms();
