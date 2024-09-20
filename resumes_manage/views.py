@@ -4,6 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 import json
 from .models import Resume
+from django.shortcuts import render
 
 
 
@@ -12,15 +13,15 @@ from .models import Resume
 @require_POST
 @csrf_exempt  # Si estás trabajando con una API para la extensión de Google
 def save_resume(request):
-    try:
+    if request.method == 'POST':    
         data = json.loads(request.body)
         
         # Datos del formulario
-        full_name = data.get('full_name')
-        birth_date = data.get('birth_date')
-        email = data.get('email')
-        phone_number = data.get('phone_number')
-        professional_summary = data.get('professional_summary')
+        full_name = data.get('full_name_input')
+        birth_date = data.get('birth_date_input')
+        email = data.get('resume_email_input')
+        phone_number = data.get('phone_number_input')
+        professional_summary = data.get('professional_summary_input')
         
         # Validación básica
         if not full_name or not email:
@@ -107,7 +108,10 @@ def save_resume(request):
                     contact_info=reference.get('contact_info')
                 )
 
-        return JsonResponse({'message': 'Hoja de vida guardada exitosamente'})
+        return JsonResponse({'success': 'Hoja de vida guardada exitosamente'})
 
-    except json.JSONDecodeError:
+    else:
         return JsonResponse({'error': 'Error en la decodificación JSON'}, status=400)
+    
+def create_resume(request):
+    return render(request, 'create_resume.html')
