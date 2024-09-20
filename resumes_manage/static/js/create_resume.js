@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
             professional_summary: professional_summary_input
         };
 
-        fetch('save_resume/', {
+        fetch('../save_resume/', {
             method: 'POST',
             body: JSON.stringify(data),
             headers: {
