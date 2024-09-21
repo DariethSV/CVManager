@@ -15,26 +15,38 @@ def save_resume(request):
     if request.method == 'POST':    
         data = json.loads(request.body)
         
-        # Datos del formulario
-        full_name = data.get('full_name')
-        birth_date = data.get('birth_date')
-        resume_email = data.get('resume_email')
-        phone_number = data.get('phone_number')
-        professional_summary = data.get('professional_summary')
+        # Datos del formulario de información personal
+        personal_info = data['personal_info']
+        full_name = personal_info['full_name']
+        birth_date = personal_info['birth_date']
+        resume_email = personal_info['resume_email']
+        phone_number = personal_info['phone_number']
+        professional_summary = personal_info['professional_summary']
         
         # Validación básica
         if not full_name or not resume_email:
             return JsonResponse({'error': 'Faltan datos obligatorios'}, status=400)
 
+        # Datos de la experiencia laboral
+        work_experience_data = data.get('work_experience')
+        if work_experience_data:
+            for experience in work_experience_data:
+                if not experience.get('company_name') or not experience.get('position'):
+                    return JsonResponse({'error': 'Faltan datos obligatorios'}, status=400)
+                
+
         # Crear el objeto Resume
-        resume = Resume.objects.create(
+        """resume = Resume.objects.create(
             full_name=full_name,
             birth_date=birth_date,
             resume_email=resume_email,
             phone_number=phone_number,
             professional_summary=professional_summary
-        )
-
+        )"""
+        #Guardar la hoja de vida en la base de datos
+        resume.save()
+        
+        
         # Guardar experiencia laboral si está presente en los datos
         work_experience_data = data.get('work_experience')
         if work_experience_data:
@@ -114,3 +126,6 @@ def save_resume(request):
     
 def create_resume(request):
     return render(request, 'create_resume.html')
+
+def show_resume(request):
+    return render(request, 'show_resume.html')
