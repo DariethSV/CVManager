@@ -28,21 +28,69 @@ def save_resume(request):
             return JsonResponse({'error': 'Faltan datos obligatorios'}, status=400)
 
         # Datos de la experiencia laboral
-        work_experience_data = data.get('work_experience')
-        if work_experience_data:
-            for experience in work_experience_data:
-                if not experience.get('company_name') or not experience.get('position'):
-                    return JsonResponse({'error': 'Faltan datos obligatorios'}, status=400)
+        work_experience = data.get('work_experience')
+        company_name = work_experience.get('company_name')
+        position = work_experience.get('position')
+        start_date = work_experience.get('start_date')
+        end_date = work_experience.get('end_date')
+        description = work_experience.get('description')
+        if not experience.get('company_name') or not experience.get('position'):
+            return JsonResponse({'error': 'Faltan datos obligatorios'}, status=400)
+                
+        # Datos de la educación
+        education = data['education']
+        degree = data.get('degree')
+        institution = data.get('institution')
+        start_date_education = data.get('start_date_education')
+        end_date_education = data.get('end_date_education')
+        description_education = data.get('description_education')
+        
+        # Datos de las habilidades
+        skills = data['skills']    
+        skill = data.get('skill')
+        proficiency_level = data.get('proficiency_level')
+        
+        # Datos de los idiomas
+        languages_data = data.get('languages')
+        language = data.get('language')
+        fluency = data.get('fluency')
+        
+        # Datos de los proyectos
+        prpjects_data = data.get('projects')
+        project = data.get('project')
+        description_project = data.get('description_project')
+        technologies_used = data.get('technologies_used')
+        
+        # Datos de las certificaciones
+        certifications_data = data.get('certifications')
+        title = data.get('title')
+        institution_certification = data.get('institution_certification')
+        date_obtained = data.get('date_obtained')
+        
+        # Datos de las referencias
+        references_data = data.get('references')
+        reference_name = data.get('reference_name')
+        relationship = data.get('relationship')
+        contact_info = data.get('contact_info')
                 
 
         # Crear el objeto Resume
-        """resume = Resume.objects.create(
+        resume = Resume(
             full_name=full_name,
             birth_date=birth_date,
             resume_email=resume_email,
             phone_number=phone_number,
-            professional_summary=professional_summary
-        )"""
+            professional_summary=professional_summary,
+            work_experience=work_experience,
+            education=education,
+            skills=skills,
+            languages=languages_data,
+            projects=projects_data,
+            certifications=certifications_data,
+            references=references_data
+            
+        )
+        
         #Guardar la hoja de vida en la base de datos
         resume.save()
         
