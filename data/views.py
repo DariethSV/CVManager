@@ -9,6 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 import os
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
+
 @login_required
 @require_POST
 def save_data(request):
