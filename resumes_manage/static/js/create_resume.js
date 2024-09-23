@@ -1,4 +1,5 @@
-const form = document.getElementById('create_resume_form');
+// This file contains the JavaScript code for the create_resume.html template.
+
 document.getElementById('create_resume_form').addEventListener('submit', event => {
     event.preventDefault();
     const data = {
