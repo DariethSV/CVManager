@@ -40,7 +40,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-
 // Función que verificar si el cliente ya tiene una hoja de vida
 function check_customer_resume() {
     fetch('http://localhost:8000/api/check_customer_resume/', {
@@ -218,3 +217,26 @@ document.getElementById('upload_resume_input').addEventListener('change', functi
         });
     }
 });
+
+// Sección de detección de formularios
+
+document.addEventListener('DOMContentLoaded', function() {
+    chrome.storage.local.get('formDetected', function(result) {
+        if (result.formDetected) {
+            const formContainer = document.getElementById('detected_form_container');
+            const customerViewContainer = document.getElementById('customer_view_container');
+
+            if (customerViewContainer) {
+                customerViewContainer.style.display = 'none';
+            }
+
+            if (formContainer) {
+                formContainer.style.display = 'block';
+            }
+
+
+            chrome.storage.local.remove('formDetected');
+        }
+    });
+});
+
