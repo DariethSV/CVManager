@@ -3,12 +3,12 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST,require_GET
 import json
-from .models import Resume
 from django.middleware.csrf import get_token
 from django.views.decorators.csrf import csrf_exempt
 import os
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
+from resumes_manage.models import Resume
 @login_required
 @require_POST
 def save_data(request):
