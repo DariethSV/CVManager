@@ -1,5 +1,5 @@
 const form = document.getElementById('create_resume_form');
-form.addEventListener('submit', function(event) {
+document.getElementById('create_resume_form').addEventListener('submit', event => {
     event.preventDefault();
     const data = {
         personal_info: {
