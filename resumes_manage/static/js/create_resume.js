@@ -8,6 +8,7 @@ form.addEventListener('submit', function(event) {
             resume_email: document.getElementById('resume_email').value,
             phone_number: document.getElementById('phone_number').value,
             professional_summary: document.getElementById('professional_summary').value
+            
         },
         work_experience: {
             company_name: document.getElementById('company_name').value,

@@ -9,25 +9,28 @@ from django.shortcuts import render
 
 @login_required
 @require_POST
-@csrf_exempt  
-
-
+@csrf_exempt
 def save_resume(request):
     if request.method == 'POST':
         data = json.loads(request.body)
-        resume = Resume.objects.create(
+
+        # Validar información personal
+        if not data.get('full_name') or not data.get('birth_date') or not data.get('resume_email') or not data.get('phone_number') or not data.get('professional_summary'):
+            return JsonResponse({'error': 'Por favor, llene todos los campos de información personal'}, status=400)
+
+        resume = Resume(
             full_name=data['full_name'],
             birth_date=data['birth_date'],
             resume_email=data['resume_email'],
             phone_number=data['phone_number'],
             professional_summary=data['professional_summary']
-            
         )
+        resume.save()
 
         # Procesar experiencia laboral
         work_experiences = data.get('work_experiences', [])
         for experience in work_experiences:
-            WorkExperience.objects.create(
+            work_experience = WorkExperience(
                 resume=resume,
                 company_name=experience['company_name'],
                 position=experience['position'],
@@ -35,11 +38,12 @@ def save_resume(request):
                 end_date=experience['end_date'],
                 description=experience['description']
             )
+            work_experience.save()  # Guardar cada objeto WorkExperience
 
         # Procesar educación
         educations = data.get('educations', [])
         for edu in educations:
-            Education.objects.create(
+            education = Education(
                 resume=resume,
                 degree=edu['degree'],
                 institution=edu['institution'],
@@ -47,56 +51,61 @@ def save_resume(request):
                 end_date=edu['end_date'],
                 description=edu['description']
             )
+            education.save()  # Guardar cada objeto Education
 
         # Procesar habilidades
         skills = data.get('skills', [])
         for skill in skills:
-            Skill.objects.create(
+            skill_obj = Skill(
                 resume=resume,
                 skill_name=skill['skill_name'],
                 proficiency_level=skill['proficiency_level']
             )
+            skill_obj.save()  # Guardar cada objeto Skill
 
         # Procesar idiomas
         languages = data.get('languages', [])
         for lang in languages:
-            Language.objects.create(
+            language = Language(
                 resume=resume,
                 language=lang['language'],
                 fluency=lang['fluency']
             )
+            language.save()  # Guardar cada objeto Language
 
         # Procesar proyectos
         projects = data.get('projects', [])
         for project in projects:
-            Project.objects.create(
+            project_obj = Project(
                 resume=resume,
                 project_name=project['project_name'],
                 description=project['description'],
                 technologies_used=project['technologies_used']
             )
+            project_obj.save()  # Guardar cada objeto Project
 
         # Procesar certificaciones
         certifications = data.get('certifications', [])
         for cert in certifications:
-            Certification.objects.create(
+            certification = Certification(
                 resume=resume,
                 title=cert['title'],
                 institution=cert['institution'],
                 date_obtained=cert['date_obtained']
             )
+            certification.save()  # Guardar cada objeto Certification
 
         # Procesar referencias
         references = data.get('references', [])
         for reference in references:
-            Reference.objects.create(
+            reference_obj = Reference(
                 resume=resume,
                 reference_name=reference['reference_name'],
                 relationship=reference['relationship'],
                 contact_info=reference['contact_info']
             )
+            reference_obj.save()  # Guardar cada objeto Reference
 
-        
         return JsonResponse({'success': 'Hoja de vida guardada exitosamente'})
 
     else:
