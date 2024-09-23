@@ -3,55 +3,53 @@ from django.db import models
 # Create your models here.
 
 class Resume(models.Model):
-    full_name = models.CharField(max_length=100)
+    full_name = models.CharField(max_length=255)
     birth_date = models.DateField()
-    resume_email = models.EmailField(max_length=100)
+    resume_email = models.EmailField()
     phone_number = models.CharField(max_length=20)
     professional_summary = models.TextField()
 
-    def __str__(self):
-        return self.full_name
+    work_experiences = models.ManyToManyField('WorkExperience')
+    educations = models.ManyToManyField('Education')
+    skills = models.ManyToManyField('Skill')
+    languages = models.ManyToManyField('Language')
+    projects = models.ManyToManyField('Project')
+    certifications = models.ManyToManyField('Certification')
+    references = models.ManyToManyField('Reference')
 
 class WorkExperience(models.Model):
-    resume = models.ForeignKey(Resume, on_delete=models.CASCADE, related_name='work_experiences')
-    company_name = models.CharField(max_length=100)
-    position = models.CharField(max_length=100)
+    company_name = models.CharField(max_length=255)
+    position = models.CharField(max_length=255)
     start_date = models.DateField()
     end_date = models.DateField()
     description = models.TextField()
 
 class Education(models.Model):
-    resume = models.ForeignKey(Resume, on_delete=models.CASCADE, related_name='education')
-    degree = models.CharField(max_length=100)
-    institution = models.CharField(max_length=100)
-    start_date = models.DateField()
-    end_date = models.DateField(null=True, blank=True)
-    description = models.TextField(null=True, blank=True)
+    degree = models.CharField(max_length=255)
+    institution = models.CharField(max_length=255)
+    start_date = models.DateField(default=None)
+    end_date = models.DateField(default=None)
+    description = models.TextField(default='')
 
 class Skill(models.Model):
-    resume = models.ForeignKey(Resume, on_delete=models.CASCADE, related_name='skills')
-    skill_name = models.CharField(max_length=100)
-    proficiency_level = models.CharField(max_length=50)
+    skill_name = models.CharField(max_length=255)
+    proficiency_level = models.CharField(max_length=255)
 
 class Language(models.Model):
-    resume = models.ForeignKey(Resume, on_delete=models.CASCADE, related_name='languages')
-    language = models.CharField(max_length=50)
-    fluency = models.CharField(max_length=50)
+    language = models.CharField(max_length=255)
+    fluency = models.CharField(max_length=255)
 
 class Project(models.Model):
-    resume = models.ForeignKey(Resume, on_delete=models.CASCADE, related_name='projects')
-    project_name = models.CharField(max_length=100)
-    description = models.TextField()
+    project_name = models.CharField(max_length=255)
+    description = models.TextField(default='')
     technologies_used = models.CharField(max_length=255)
 
 class Certification(models.Model):
-    resume = models.ForeignKey(Resume, on_delete=models.CASCADE, related_name='certifications')
-    title = models.CharField(max_length=100)
-    institution = models.CharField(max_length=100)
-    date_obtained = models.DateField()
+    title = models.CharField(max_length=255)
+    institution = models.CharField(max_length=255)
+    date_obtained = models.DateField(default=None)
 
 class Reference(models.Model):
-    resume = models.ForeignKey(Resume, on_delete=models.CASCADE, related_name='references')
-    reference_name = models.CharField(max_length=100)
-    relationship = models.CharField(max_length=100)
+    reference_name = models.CharField(max_length=255)
+    relationship = models.CharField(max_length=255)
     contact_info = models.CharField(max_length=255)
