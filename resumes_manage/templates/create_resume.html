@@ -11,7 +11,8 @@
 
 <body>
     <h1>Create Resume</h1>
-    <form id="create-resume-form">
+    <form id="create_resume_form" method="POST">
+        {% csrf_token %} 
         <!-- Información personal -->
         <h2>Personal Information</h2>
         <label for="full_name">Full Name:</label>
@@ -100,7 +101,7 @@
         <label for="contact_info">Phone Number:</label>
         <input type="tel" id="contact_info" name="contact_info"><br><br>
 
-        <button type="submit" id="create_resume_form">Create Resume</button>
+        <button type="submit">Create Resume</button>
     </form>
 </body>
 </html>

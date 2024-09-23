@@ -10,7 +10,9 @@ from django.shortcuts import render
 @login_required
 @require_POST
 @csrf_exempt
+
 def save_resume(request):
+   
     if request.method == 'POST':
         data = json.loads(request.body)
 

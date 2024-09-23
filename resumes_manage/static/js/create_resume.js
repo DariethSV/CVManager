@@ -2,6 +2,7 @@
 
 document.getElementById('create_resume_form').addEventListener('submit', event => {
     event.preventDefault();
+    console.log("Formulario enviado");
     const data = {
         personal_info: {
             full_name: document.getElementById('full_name').value,
@@ -49,7 +50,7 @@ document.getElementById('create_resume_form').addEventListener('submit', event =
             contact_info: document.getElementById('contact_info').value
         }
     };
-
+    console.log("Datos capturados: ", data);
     fetch('/save_resume/', {
         method: 'POST',
         body: JSON.stringify(data),
