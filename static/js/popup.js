@@ -182,7 +182,7 @@ function log_out() {
 
 // Función para crear hoja de vida
 document.getElementById('create_resume_button').addEventListener('click', function(){
-    window.open('http://localhost:8000/create_resume/', '_blank');
+    window.open('http://localhost:8000/resume/create_resume/', '_blank');
 });
 
 // Función que envia el documento cargado a Django
