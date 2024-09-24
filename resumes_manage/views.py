@@ -11,6 +11,7 @@ from access.models import Customer
 @login_required
 @require_POST
 @csrf_exempt
+
 def save_resume(request):
     user = request.user
     
@@ -37,24 +38,80 @@ def save_resume(request):
         project_name = request.POST.get('project_name')
         description_project = request.POST.get('description_project')
         title = request.POST.get('title')
-        institution = request.POST.get('institution')
+        institution_certification = request.POST.get('institution_certification')
         date_obtained = request.POST.get('date_obtained')
         reference_name = request.POST.get('reference_name')
         relationship = request.POST.get('relationship')
         contact_info = request.POST.get('contact_info')
 
+        print("PERSONAL INFORMATION: ")
+        print("FULL NAME: ")
+        print(full_name)
+        print("BIRTH DATE: ")
+        print(birth_date)
+        print("RESUME EMAIL: ")
+        print(resume_email)
+        print("PHONE NUMBER: ")
+        print(phone_number)
+        print("PROFESSIONAL SUMMARY: ")
+        print(professional_summary)
+        print("\n")
+        print("EXPERIENCE: ")
+        print("COMPANY NAME: ")
+        print(company_name)
+        print("\n")
+        print("EDUCATION: ")
+        print("DEGREE: ")
+        print(degree)
+        print("INSTITUTION: ")
+        print(institution)
+        print("\n")
+        print("PROJECTS: ")
+        print("PROJECT NAME: ")
+        print(project_name)
+        print("\n")
+        print("Languanges: ")
         print("FLUENCY LEVEL: ")
         print(fluency)
+        print("\n")
+        print("SKILLS: ")
+        print("SKILLS: ")
+        print(skills)
+        print("PROFICIENCY LEVEL: ")
+        print(proficiency_level)
+        print("\n")
+        print("LANGUAGE: ")
+        print(language)
 
-
-
+            
         resume = Resume(
             customer=customer,
             full_name=full_name,
             birth_date=birth_date,
             resume_email=resume_email,
             phone_number=phone_number,
-            professional_summary=professional_summary
+            professional_summary=professional_summary,
+            company_name=company_name,
+            position=position,
+            start_date=start_date,
+            description=description,
+            degree=degree,
+            institution=institution,
+            start_date_education=start_date_education, 
+            end_date_education=end_date_education,
+            description_education=description_education,
+            skill_name=skills,
+            proficiency_level=proficiency_level,
+            language=language,
+            fluency=fluency,
+            project_name=project_name,
+            description_project=description_project,
+            title=title,
+            institution_certification=institution_certification,
+            date_obtained=date_obtained,
+            reference_name=reference_name,
+            relationship=relationship,
+            contact_info=contact_info
         )
         resume.save()       
         messages.success(request, 'Hoja de vida creada exitosamente')
