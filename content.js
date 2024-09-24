@@ -26,6 +26,14 @@ function detect_forms() {
             button.style.color = 'blue';
             button.style.textDecoration = 'underline';
 
+            // Buscar una palabra en el contenido del input
+            const word = 'buscar_palabra';
+            if (input.value.includes(word)) {
+                console.log(`La palabra "${word}" se encuentra en el input.`);
+            } else {
+                console.log(`La palabra "${word}" no se encuentra en el input.`);
+            }
+
             button.onclick = () => fill_input(input);
 
             input.parentNode.insertBefore(container, input);
@@ -37,26 +45,65 @@ function detect_forms() {
     });
 }
 
+
 function fill_input(input) {
-    fetch('http://localhost:8000/api/get_data/')
-        .then(response => response.json())
-        .then(data => {
-            const resume_data = data.resume_data[0]; // Obtener el primer objeto del array
-            if (resume_data) {
-                const key = (input.name).toLowerCase(); // Usar name o id del input para buscar en los datos del servidor
-                if (key && resume_data[key] !== undefined) {
-                    // Si existe un valor para la key en los datos del servidor
-                    input.value = resume_data[key];
-                } else {
-                    alert(`No se encontró un valor para "${key}" en los datos.`);
-                }
+    fetch('http://localhost:8000/api/get_data/', {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': csrf_token // Incluir el token CSRF en el header
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const resume_data = data.resume_data[0];
+        if (resume_data) {
+            const key = (input.name).toLowerCase();
+            if (key && resume_data[key] !== undefined) {
+                input.value = resume_data[key];
+            } else {
+                alert(`No se encontró un valor para "${key}" en los datos.`);
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Hubo un error al cargar los datos. Por favor, intenta de nuevo.');
-        });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Hubo un error al cargar los datos. Por favor, intenta de nuevo.');
+    });
+    }
+
+
+
+function initializeUploadForm() {
+    $(document).ready(function() {
+        $('#uploadForm').on('submit', function(event) {
+            event.preventDefault();
+            var formData = new FormData(this);
+    
+            $.ajax({
+                url: 'http://localhost:8000/api/get_data/',
+
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    $('#message').text(response.message);
+                    if (response.warning) {
+                        $('#warning').text(response.warning).css('color', 'red');
+                    } else {
+                       $('#warning').text('');
+                    }
+                },
+                error: function(response) {
+                    $('#message').text('Error al subir el archivo').css('color', 'red');
+                }
+            });
+       });
+    });
 }
+
+
 
 // Llama a la función para detectar formularios
 detect_forms();
+initializeUploadForm();
