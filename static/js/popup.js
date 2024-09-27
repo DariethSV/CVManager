@@ -319,13 +319,7 @@ document.getElementById('autocomplete_button').addEventListener('click', async f
         const matched_dict = await match_inputs_info(stored_input_names);
         console.log('Enviando mensaje con el diccionario:', matched_dict); // Agregar esto para depurar
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            chrome.tabs.sendMessage(tabs[0].id, { type: 'SEND_MATCHED_DICT', data: matched_dict }, (response) => {
-                if (response && response.status === 'success') {
-                    alert(response.message); // Mostrar mensaje de éxito
-                } else {
-                    alert('Error al autocompletar el formulario');
-                }
-            });
+        chrome.tabs.sendMessage(tabs[0].id, { type: 'SEND_MATCHED_DICT', data: matched_dict });
         });
     } else {
         alert('No se encontraron nombres de inputs guardados.');

@@ -23,9 +23,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             }
         });
 
-        // Si necesitas responder al popup
-        sendResponse({ status: 'success', message: 'Formulario autocompletado' });
+        alert("Formulario autocompletado con éxito");
     }
+    
+    return true;
 });
 
 
