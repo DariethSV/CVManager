@@ -1,4 +1,4 @@
-// Maneja vistas de inicio, iniciar sesión, registro y cierre de sesión
+// Maneja vistas de inicio, iniciar sesión, registro, cierre de sesión, customer views y admin view
 document.addEventListener('DOMContentLoaded', function() {
     const is_logged_in = localStorage.getItem('user_logged_in');
     const is_customer = localStorage.getItem('is_customer');
@@ -46,21 +46,26 @@ function check_customer_resume() {
         method: 'GET',
         credentials: 'include'
     })
-        .then(response => response.json())
-        .then(data => {
-            if (data.has_resume) {
-                return true
-            }
-            else{
-                return false
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Error en la respuesta del servidor: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.has_resume) {
+            return true;
+        } else {
+            return false;
+        }
+    })
+    .catch(error => {
+        console.error('Error en fetch:', error);
     });
 }
 
-// Función que redirecciona a la vista de cliente SIN hoja de vida aún
+
+// Función que redirecciona a la vista de cliente SIN hoja de vida aún o con hoja de vida
 function redirect_to_customer_view(){
     const customer_view_container = document.getElementById('customer_view_container');
     const login_form_container = document.getElementById('log_in_form_container');
@@ -72,10 +77,9 @@ function redirect_to_customer_view(){
     home_div.style.display = 'none';
     customer_view_container.style.display='block';
     login_form_container.style.display='none';
+
     if(has_resume){
         show_resume_button.style.display='block';
-        create_resume_button.style.display='none';
-        upload_resume.style.display='none'
     }
     else{
         show_resume_button.style.display='none';
@@ -90,10 +94,21 @@ function redirect_to_admin_view(){
     const admin_view_container = document.getElementById('admin_view_container');
     const home_div = document.getElementById('home_div');
     home_div.style.display = 'none';
-    login_form.style.display='none';
+    login_form_container.style.display='none';
     admin_view_container.style.display='block';
 
 }
+
+// Función que redirecciona a iniciar sesión
+function redirect_to_login_form(){
+    const login_form_container = document.getElementById('log_in_form_container');
+    const sign_up_form_container = document.getElementById('sign_up_form_container');
+    sign_up_form_container.style.display = 'none';
+    login_form_container.style.display='block';
+}
+
+// Función que obtiene todas las hojas de vida del Cliente
+
 
 // Función de registro de usuarios
 document.getElementById('sign_up_form').addEventListener('submit',  function(event){
@@ -184,7 +199,6 @@ function log_out() {
 document.getElementById('create_resume_button').addEventListener('click', function(){
     window.open('http://localhost:8000/resume/create_resume/', '_blank');
 });
-
 // Función que envia el documento cargado a Django
 document.getElementById('upload_resume_input').addEventListener('change', function(event) {
     // El evento "change"  se dispara cuando el usuario cambia el valor de un input
@@ -218,11 +232,10 @@ document.getElementById('upload_resume_input').addEventListener('change', functi
     }
 });
 
-// Sección de detección de formularios
-
+//Vista al detectar formulario
 document.addEventListener('DOMContentLoaded', function() {
-    chrome.storage.local.get('formDetected', function(result) {
-        if (result.formDetected) {
+    chrome.storage.local.get('form_detected', function(result) {
+        if (result.form_detected) {
             const formContainer = document.getElementById('detected_form_container');
             const customerViewContainer = document.getElementById('customer_view_container');
 
@@ -235,8 +248,89 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
 
-            chrome.storage.local.remove('formDetected');
+            chrome.storage.local.remove('form_detected');
         }
     });
 });
+
+// Función que obtiene la información de la base de datos
+async function get_data() {
+    try {
+        const response = await fetch('http://localhost:8000/api/get_data/', {
+            method: 'GET',
+            credentials: 'include'
+        });
+
+        const data = await response.json();
+
+        if (!data.error) {
+            return data.resume_data; // Retornar los datos si no hay error
+        } else {
+            alert('Error: ' + data.error);
+            throw new Error(data.error); // Lanzar un error si hay uno
+        }
+    } catch (error) {
+        alert('Error en la solicitud: ' + error.message);
+    }
+}
+
+// Función que hace match de los inputs names y la información de la base de datos
+async function match_inputs_info(input_names) {
+    try {
+        const response = await fetch('http://localhost:8000/api/match_inputs_info/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ input_names: input_names }) 
+        });
+
+        if (!response.ok) {
+            throw new Error('Error en la respuesta del servidor');
+        }
+
+        const data = await response.json();
+        if (data.success){
+            return data['matched_dict'];
+        } else {
+            alert(data.error);
+        }
+        
+    } catch (error) {
+        alert('Error al enviar los datos:' + error);
+        alert('Hubo un problema al enviar los datos');
+    }
+}
+
+
+// Función que recoge los inputs detectados en la página
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.type === 'FORM_DATA') {
+        localStorage.setItem('input_names', JSON.stringify(request.data));
+    }
+});
+
+// Función que detecta cuándo se hace click al botón autocompletar
+document.getElementById('autocomplete_button').addEventListener('click', async function() {
+    const data = await get_data(); 
+    const stored_input_names = JSON.parse(localStorage.getItem('input_names'));
+    if (stored_input_names && stored_input_names.length > 0) {
+        const matched_dict = await match_inputs_info(stored_input_names);
+        console.log('Enviando mensaje con el diccionario:', matched_dict); // Agregar esto para depurar
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            chrome.tabs.sendMessage(tabs[0].id, { type: 'SEND_MATCHED_DICT', data: matched_dict }, (response) => {
+                if (response && response.status === 'success') {
+                    alert(response.message); // Mostrar mensaje de éxito
+                } else {
+                    alert('Error al autocompletar el formulario');
+                }
+            });
+        });
+    } else {
+        alert('No se encontraron nombres de inputs guardados.');
+    }
+    
+});
+
 

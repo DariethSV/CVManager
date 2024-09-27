@@ -5,7 +5,8 @@
     "description": "Una extensión para enviar datos a Django",
     "permissions": [
         "storage",
-        "activeTab"
+        "activeTab",
+        "scripting"
     ],
     "host_permissions": [
         "http://localhost:8000/*",
