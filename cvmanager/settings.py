@@ -133,13 +133,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_CREDENTIALS = True
-CORS_ORIGIN_WHITELIST = [
-    'http://localhost:8000', 
-]
-
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8000",
-]
 CSRF_TRUSTED_ORIGINS = [
     'chrome-extension://ceifglbmciaiimjnoclldhmdjehpeono',
 ]

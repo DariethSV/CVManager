@@ -17,9 +17,10 @@ def save_resume(request):
     
     if request.method == 'POST':
         customer = Customer.objects.get(email=user.email)
-        full_name = request.POST.get('full_name')
+        first_name = request.POST.get('first_name')
+        surname = request.POST.get('surname')
         birth_date = request.POST.get('birth_date')
-        resume_email = request.POST.get('resume_email')
+        email = request.POST.get('email')
         phone_number = request.POST.get('phone_number')
         professional_summary = request.POST.get('professional_summary')
         company_name = request.POST.get('company_name')
@@ -55,53 +56,13 @@ def save_resume(request):
         relationship = request.POST.get('relationship')
         contact_info = request.POST.get('contact_info')
 
-        print("PERSONAL INFORMATION: ")
-        print("FULL NAME: ")
-        print(full_name)
-        print("BIRTH DATE: ")
-        print(birth_date)
-        print("RESUME EMAIL: ")
-        print(resume_email)
-        print("PHONE NUMBER: ")
-        print(phone_number)
-        print("PROFESSIONAL SUMMARY: ")
-        print(professional_summary)
-        print("\n")
-        print("EXPERIENCE: ")
-        print("COMPANY NAME: ")
-        print(company_name)
-        print("FECHA DE EMPLEO: ")
-        print(start_date)
-        print("\n")
-        print("EDUCATION: ")
-        print("DEGREE: ")
-        print(degree)
-        print("INSTITUTION: ")
-        print(institution)
-        print("\n")
-        print("PROJECTS: ")
-        print("PROJECT NAME: ")
-        print(project_name)
-        print("\n")
-        print("Languanges: ")
-        print("FLUENCY LEVEL: ")
-        print(fluency)
-        print("\n")
-        print("SKILLS: ")
-        print("SKILLS: ")
-        print(skills)
-        print("PROFICIENCY LEVEL: ")
-        print(proficiency_level)
-        print("\n")
-        print("LANGUAGE: ")
-        print(language)
-
             
         resume = Resume(
             customer=customer,
-            full_name=full_name,
+            first_name=first_name,
+            surname=surname,
             birth_date=birth_date,
-            resume_email=resume_email,
+            email=email,
             phone_number=phone_number,
             professional_summary=professional_summary,
             company_name=company_name,

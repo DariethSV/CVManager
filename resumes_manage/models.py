@@ -5,9 +5,10 @@ from access.models import Customer
 
 class Resume(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='resumes')
-    full_name = models.CharField(max_length=255)
+    first_name = models.CharField(max_length=255)
+    surname = models.CharField(max_length=255,default='')
     birth_date = models.DateField(default="1900-01-01")
-    resume_email = models.EmailField()
+    email = models.EmailField()
     phone_number = models.CharField(max_length=20)
     professional_summary = models.TextField()
     company_name = models.CharField(max_length=255, default='')
