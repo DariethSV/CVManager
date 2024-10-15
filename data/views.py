@@ -10,13 +10,13 @@ from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 from resumes_manage.models import Resume
 from access.models import Customer
-from sentence_transformers import SentenceTransformer
-from sklearn.metrics.pairwise import cosine_similarity
-import numpy as np
+import os
+from groq import Groq
+from dotenv import load_dotenv
 
-model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
-
-
+load_dotenv('api_keys.env')
+groq_api_key = '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'
+client = Groq(api_key=groq_api_key)
 
 
 
@@ -28,33 +28,63 @@ def match_inputs_info(request):
     resume = customer.resumes.first()
     if request.method == 'POST':
         data = json.loads(request.body)
-        input_names = data['input_names']
+        labels = data['labels']
+        print("LABELS: ",labels)
 
+        database_fields = ["first_name","surname","birth_date","email","phone_number","professional_summary","company_name","position","start_date","end_date","description","degree","institution","start_date_education","end_date_education","description_education","skill_name","proficiency_level","language","fluency","project_name","description_project","technologies_used","title","institution_certification","date_obtained","reference_name","relationship","contact_info"]
+        prompt = f'''Empareja los términos de la Lista A con los más relacionados de la Lista B. El resultado debe ser un diccionario en formato JSON donde cada término de la Lista A se asocie con el campo más adecuado de la Lista B.
 
-        database_fields = ["first_name","surname","birth_date","email","phone_number","professional_summary","company_name","position","start_date","end_date","description""degree","institution","start_date_education","end_date_education","description_education","skill_name","proficiency_level","language","fluency","project_name","description_project","technologies_used","title","institution_certification","date_obtained","reference_name","relationship","contact_info"]
+        Lista A: {labels}
 
-        matched_dict = {}
+        Lista B: {database_fields}
+
+        El diccionario JSON el cual deberá ser compatible para usar la función json.loads() en python, debe tener la siguiente estructura: "Término de A": "Término correspondiente de B". Solo incluye en el resultado aquellos términos que tengan una relación clara y precisa entre ambas listas. Si algún término de la Lista A no tiene una correspondencia clara en la Lista B, no lo incluyas en el diccionario. Utiliza únicamente los términos proporcionados en las listas y asegúrate de que las asociaciones sean precisas y significativas.
+
+        Responde únicamente con el diccionario JSON generado.'''
+        response = client.chat.completions.create(
+        model="gemma2-9b-it",
+        temperature=0,
+        top_p=1,
+        messages=[{
+            "role": "user",
+            "content": prompt
+        }]
+        )
+
+        content = response.choices[0].message.content
+        content = content.replace('`','')
+        content = content.replace('json','')
+        content = content.strip()
+        print("PRIMER CONTENT: ",content)
+        try:
+            matched_dict = json.loads(content)
+            print(matched_dict)
+        except json.JSONDecodeError as e:
+            print("ERROR", e)
         matched_dict_update = {}
+        inputs_not_filled = []
+        for key, value in matched_dict.items():
+            try:
+                if(value):
+                    matched_dict_update[key] = getattr(resume, value)
+            except AttributeError:
+                inputs_not_filled.append(key)
+        
+        print("DICCIONARIO: ",matched_dict_update)
+        print("=========================================================")
+        print("INPUTS NO COMPLETADOS: ",inputs_not_filled)
 
-        input_embeddings = model.encode(input_names)
-        field_embeddings = model.encode(database_fields)
-        similarities = cosine_similarity(input_embeddings, field_embeddings)
-        matched_indices = np.argmax(similarities, axis=1)
-        matched_dict = {input_names[i]: database_fields[matched_indices[i]] for i in range(len(input_names))}
+            
 
-        for key,value in matched_dict.items():
-            if key == "name":
-                matched_dict_update[key] = resume.first_name
-            elif "last_name" in key:
-                matched_dict_update[key] = resume.surname
-            else:
-                matched_dict_update[key] = getattr(resume, value, None)
-        print("MATCHED_DICT: ", matched_dict)
-        print("MATCHED_DICT_UPDATE", matched_dict_update)
-        return JsonResponse({'success': 'Datos emparejados', 'matched_dict': matched_dict_update})
+
+        
+        return JsonResponse({'success': 'Datos emparejados', 'matched_dict': matched_dict_update, 'inputs_not_filled':inputs_not_filled})
 
     return JsonResponse({'error': 'Método no permitido.'}, status=405)
 
+    
+    
+    
 @csrf_exempt
 @login_required
 @require_GET
