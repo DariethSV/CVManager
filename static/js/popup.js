@@ -133,10 +133,28 @@ document.getElementById('sign_up_form').addEventListener('submit',  function(eve
             }).then( response => response.json())
             .then(data => {
                 if (data.error) {
-                    alert(data.error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: data.error,
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                        background: '#f0f0f0',
+                        confirmButtonColor: '#d33'
+                    });
                 } else {
-                    alert(data.message);
-                    redirect_to_login_form();
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: 'Registro de usuario exitoso',
+                        icon: 'success',
+                        confirmButtonText: 'OK',
+                        background: '#f0f0f0',
+                        confirmButtonColor: '#038b71',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            redirect_to_login_form();
+                        }
+                    });
+                    
                 }
             })
             .catch((error) => {
@@ -165,9 +183,24 @@ document.getElementById('log_in_form').addEventListener('submit',  function(even
             }).then( response => response.json())
             .then(data => {
                 if (data.error) {
-                    alert(data.error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: data.error,
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                        background: '#f0f0f0',
+                        confirmButtonColor: '#d33'
+                    });
                 } else {
-                    alert(data.message);
+                    
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: data.message,
+                        icon: 'success',
+                        confirmButtonText: 'OK',
+                        background: '#f0f0f0',
+                        confirmButtonColor: '#038b71',
+                    });
                     localStorage.setItem('user_logged_in', 'true');
                     if(data.customer){
                         localStorage.setItem('is_customer', 'true');
@@ -224,10 +257,24 @@ document.getElementById('upload_resume_input').addEventListener('change', functi
         })
         .then(data => {
             // Maneja la respuesta del servidor
-            alert('Archivo subido exitosamente');
+            Swal.fire({
+                title: '¡Éxito!',
+                text: 'Archivo subido exitosamente',
+                icon: 'success',
+                confirmButtonText: 'OK',
+                background: '#f0f0f0',
+                confirmButtonColor: '#038b71',
+            });
         })
         .catch(error => {
-            alert('Error al subir el archivo:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'Hubo un error en la conexión con el servidor.',
+                icon: 'error',
+                confirmButtonText: 'OK',
+                background: '#f0f0f0',
+                confirmButtonColor: '#d33'
+            });
         });
     }
 });
@@ -266,23 +313,29 @@ async function get_data() {
         if (!data.error) {
             return data.resume_data; // Retornar los datos si no hay error
         } else {
-            alert('Error: ' + data.error);
             throw new Error(data.error); // Lanzar un error si hay uno
         }
     } catch (error) {
-        alert('Error en la solicitud: ' + error.message);
+        Swal.fire({
+            title: 'Error',
+            text: 'Hubo un error en la conexión con el servidor.',
+            icon: 'error',
+            confirmButtonText: 'OK',
+            background: '#f0f0f0',
+            confirmButtonColor: '#d33'
+        });
     }
 }
 
 // Función que hace match de los inputs names y la información de la base de datos
-async function match_inputs_info(input_names) {
+async function match_inputs_info(labels) {
     try {
         const response = await fetch('http://localhost:8000/api/match_inputs_info/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ input_names: input_names }) 
+            body: JSON.stringify({ labels: labels }) 
         });
 
         if (!response.ok) {
@@ -292,38 +345,72 @@ async function match_inputs_info(input_names) {
         const data = await response.json();
         if (data.success){
             return data['matched_dict'];
-        } else {
-            alert(data.error);
         }
         
     } catch (error) {
-        alert('Error al enviar los datos:' + error);
-        alert('Hubo un problema al enviar los datos');
+        Swal.fire({
+            title: 'Error',
+            text: 'Hubo un error en la conexión con el servidor.',
+            icon: 'error',
+            confirmButtonText: 'OK',
+            background: '#f0f0f0',
+            confirmButtonColor: '#d33'
+        });
     }
 }
 
-
+var labels = [];
+var dict_labels_inputs = {};
 // Función que recoge los inputs detectados en la página
-
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.type === 'FORM_DATA') {
-        localStorage.setItem('input_names', JSON.stringify(request.data));
+        labels = request.data.cleaned_keys;
+        dict_labels_inputs = request.data.dict;
     }
 });
 
 // Función que detecta cuándo se hace click al botón autocompletar
 document.getElementById('autocomplete_button').addEventListener('click', async function() {
+    const sweet_alert_container = document.getElementById('sweet_alert_container');
+    const form_container = document.getElementById('detected_form_container');
+
+    sweet_alert_container.style.display = 'block'
+    form_container.style.display = 'none'
+
+    Swal.fire({
+        title: 'Autocompletando...',
+        text: 'Por favor, espera mientras autocompletamos el formulario.',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+            Swal.showLoading();  // Muestra el spinner de carga
+        }
+    });
+
     const data = await get_data(); 
-    const stored_input_names = JSON.parse(localStorage.getItem('input_names'));
-    if (stored_input_names && stored_input_names.length > 0) {
-        const matched_dict = await match_inputs_info(stored_input_names);
-        console.log('Enviando mensaje con el diccionario:', matched_dict); // Agregar esto para depurar
+    const stored_labels = labels
+    if (stored_labels && stored_labels.length > 0) {
+        const matched_dict = await match_inputs_info(stored_labels);
+        
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        chrome.tabs.sendMessage(tabs[0].id, { type: 'SEND_MATCHED_DICT', data: matched_dict });
+        chrome.tabs.sendMessage(tabs[0].id, { type: 'SEND_MATCHED_DICT', data: {matched_dict:matched_dict,dict_labels_inputs:dict_labels_inputs} });
         });
-    } else {
-        alert('No se encontraron nombres de inputs guardados.');
-    }
+        Swal.close();  // Cierra el alert de cargando
+        Swal.fire({
+            title: '¡Éxito!',
+            text: 'Formulario autocompletado con éxito.',
+            icon: 'success',
+            confirmButtonText: 'OK',
+            background: '#f0f0f0',
+            confirmButtonColor: '#038b71',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Cerrar el popup cuando se haga clic en "OK"
+                window.close();
+            }
+        });
+    } 
+
     
 });
 

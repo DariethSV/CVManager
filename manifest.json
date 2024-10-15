@@ -23,5 +23,11 @@
     ],
     "background": {
         "service_worker": "static/js/service_worker.js"
-    }
+    },
+    "web_accessible_resources": [
+        {
+            "resources": ["static/js/sweetalert2.min.js"],
+            "matches": ["<all_urls>"]
+        }
+    ]
 }
