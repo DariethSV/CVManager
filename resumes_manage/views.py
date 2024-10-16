@@ -25,11 +25,19 @@ def save_resume(request):
         company_name = request.POST.get('company_name')
         position = request.POST.get('position')
         start_date = request.POST.get('start_date')
+
+        if  not start_date:
+            start_date="1900-01-01"
+
         description = request.POST.get('description')
         degree = request.POST.get('degree')
         institution = request.POST.get('institution')
         start_date_education = request.POST.get('start_date_education')
         end_date_education = request.POST.get('end_date_education')
+        
+        if  not end_date_education:
+            end_date_education="1900-01-01"
+
         description_education = request.POST.get('description_education')
         skills = request.POST.get('skills')
         proficiency_level = request.POST.get('proficiency_level')
@@ -40,6 +48,9 @@ def save_resume(request):
         title = request.POST.get('title')
         institution_certification = request.POST.get('institution_certification')
         date_obtained = request.POST.get('date_obtained')
+        if  not date_obtained:
+            date_obtained="1900-01-01"
+
         reference_name = request.POST.get('reference_name')
         relationship = request.POST.get('relationship')
         contact_info = request.POST.get('contact_info')
@@ -59,6 +70,8 @@ def save_resume(request):
         print("EXPERIENCE: ")
         print("COMPANY NAME: ")
         print(company_name)
+        print("FECHA DE EMPLEO: ")
+        print(start_date)
         print("\n")
         print("EDUCATION: ")
         print("DEGREE: ")
