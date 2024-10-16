@@ -128,5 +128,7 @@ def save_resume(request):
 def create_resume(request):
     return render(request, 'create_resume.html')
 
+
+
 def show_resume(request):
     return render(request, 'show_resume.html')
