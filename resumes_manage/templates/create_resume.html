@@ -2,102 +2,216 @@
 {% block title %}Create Resume{% endblock %}
 {% block content %}
 
-
-
-    
-    <h1>Create Resume</h1>
-    <form id="create_resume_form" action="{% url 'save_resume' %}" method="POST">
+<div class="container my-5">
+    <h1 class="text-center mb-4">Create Resume</h1>
+    <form form id="create_resume_form" action="{% url 'save_resume' %}" method="POST">
         <!-- Información personal -->
-        <h2>Personal Information</h2>
-        <label for="full_name">Full Name:</label>
-        <input type="text" id="full_name" name="full_name" required><br><br>
-        <label for="birth_date">Birth Date:</label>
-        <input type="date" id="birth_date" name="birth_date" required><br><br>
-        <label for="resume_email">Resume Email:</label>
-        <input type="email" id="resume_email" name="resume_email" required><br><br>
-        <label for="phone_number">Phone Number:</label>
-        <input type="tel" id="phone_number" name="phone_number" required><br><br>
-        <label for="professional_summary">Professional Summary:</label>
-        <textarea id="professional_summary" name="professional_summary" required></textarea><br><br>
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">Personal Information</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="full_name" class="form-label">Full Name:</label>
+                    <input type="text" class="form-control" id="full_name" name="full_name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="id_card" class="form-label">Id_number:</label>
+                    <input type="text" class="form-control" id="id_card" name="id_card" required>
+                </div>
+                <div class="mb-3">
+                    <label for="birth_date" class="form-label">Birth Date:</label>
+                    <input type="date" class="form-control" id="birth_date" name="birth_date" required>
+                </div>
+                <div class="mb-3">
+                    <label for="gender" class="form-label">Gender:</label>
+                    <select class="form-select" id="gender" name="gender" required>
+                        <option value="Female">Female</option>
+                        <option value="Male">Male</option>
+                        
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="resume_email" class="form-label">Email:</label>
+                    <input type="email" class="form-control" id="resume_email" name="resume_email" required>
+                </div>
+                <div class="mb-3">
+                    <label for="phone_number" class="form-label">Phone Number:</label>
+                    <input type="tel" class="form-control" id="phone_number" name="phone_number" required>
+                </div>
+                <div class="mb-3">
+                    <label for="country" class="form-label">Country:</label>
+                    <input type="text" class="form-control" id="country" name="country" required>
+                </div>
+                <div class="mb-3">
+                    <label for="city" class="form-label">City:</label>
+                    <input type="text" class="form-control" id="city" name="city" required>
+                </div>
+                <div class="mb-3">
+                    <label for="expected_salary" class="form-label">Expected Salary:</label>
+                    <input type="text" class="form-control" id="expected_salary" name="expected_salary" required>
+                </div>
+                <div class="mb-3">
+                    <label for="professional_summary" class="form-label">Professional Summary:</label>
+                    <textarea class="form-control" id="professional_summary" name="professional_summary" rows="3" required></textarea>
+                </div>
+            </div>
+        </div>
 
         <!-- Experiencia laboral -->
-        <h2>Work Experience</h2>
-        <label for="company_name">Company Name:</label>
-        <input type="text" id="company_name" name="company_name"><br><br>
-        <label for="position">Position:</label>
-        <input type="text" id="position" name="position"><br><br>
-        <label for="start_date">Start Date:</label>
-        <input type="date" id="start_date" name="start_date"  ><br><br>
-        <label for="end_date">End Date:</label>
-        <input type="date" id="end_date" name="end_date" ><br><br>
-        <label for="description">Work Summary:</label>
-        <textarea id="description" name="description"></textarea><br><br>
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">Work Experience</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="company_name" class="form-label">Company Name:</label>
+                    <input type="text" class="form-control" id="company_name" name="company_name">
+                </div>
+                <div class="mb-3">
+                    <label for="position" class="form-label">Position:</label>
+                    <input type="text" class="form-control" id="position" name="position">
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="start_date" class="form-label">Start Date:</label>
+                        <input type="date" class="form-control" id="start_date" name="start_date">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="end_date" class="form-label">End Date:</label>
+                        <input type="date" class="form-control" id="end_date" name="end_date">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Work Summary:</label>
+                    <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                </div>
+            </div>
+        </div>
 
         <!-- Educación -->
-        <h2>Education</h2>
-        <label for="degree">Degree:</label>
-        <input type="text" id="degree" name="degree" required><br><br>
-        <label for="institution">Institution:</label>
-        <input type="text" id="institution" name="institution" required><br><br>
-        <label for="start_date_education">Start Date:</label>
-        <input type="date" id="start_date_education" name="start_date_education"  required>
-        <label for="end_date_education">End Date:</label>
-        <input type="date" id="end_date_education" name="end_date_education" ><br><br>
-        <label for="description_education">Education Summary:</label>
-        <textarea id="description_education" name="description_education"></textarea><br><br>
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">Education</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="degree" class="form-label">Degree:</label>
+                    <input type="text" class="form-control" id="degree" name="degree" required>
+                </div>
+                <div class="mb-3">
+                    <label for="institution" class="form-label">Institution:</label>
+                    <input type="text" class="form-control" id="institution" name="institution" required>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="start_date_education" class="form-label">Start Date:</label>
+                        <input type="date" class="form-control" id="start_date_education" name="start_date_education" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="end_date_education" class="form-label">End Date:</label>
+                        <input type="date" class="form-control" id="end_date_education" name="end_date_education">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="description_education" class="form-label">Education Summary:</label>
+                    <textarea class="form-control" id="description_education" name="description_education" rows="3"></textarea>
+                </div>
+            </div>
+        </div>
 
         <!-- Habilidades -->
-        <h2>Professional Summary</h2>
-        <label for="skills">Skills:</label>
-        <input type="text" id="skill_name" name="skills" required><br><br>
-        <label for="proficiency_level">Skill Level:</label>
-        <select id="proficiency_level" name="proficiency_level" required>
-            <option value="Beginner">Beginner</option>
-            <option value="Intermediate">Intermediate</option>
-            <option value="Advanced">Advanced</option>
-        </select><br><br>
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">Skills</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="skills" class="form-label">Skills:</label>
+                    <input type="text" class="form-control" id="skills" name="skills" required>
+                </div>
+                <div class="mb-3">
+                    <label for="proficiency_level" class="form-label">Skill Level:</label>
+                    <select class="form-select" id="proficiency_level" name="proficiency_level" required>
+                        <option value="Beginner">Beginner</option>
+                        <option value="Intermediate">Intermediate</option>
+                        <option value="Advanced">Advanced</option>
+                    </select>
+                </div>
+            </div>
+        </div>
 
         <!-- Idiomas -->
-        <h2>Languages</h2>
-        <label for="language">Language:</label>
-        <input type="text" id="language" name="language"><br><br>
-        <label for="fluency">Language Level:</label>
-        <select id="fluency" name="fluency">
-            <option value="Beginner">Beginner</option>
-            <option value="Intermediate">Intermediate</option>
-            <option value="Advanced">Advanced</option>
-        </select><br><br>
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">Languages</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="language" class="form-label">Language:</label>
+                    <input type="text" class="form-control" id="language" name="language">
+                </div>
+                <div class="mb-3">
+                    <label for="fluency" class="form-label">Fluency:</label>
+                    <select class="form-select" id="fluency" name="fluency">
+                        <option value="Beginner">Beginner</option>
+                        <option value="Intermediate">Intermediate</option>
+                        <option value="Advanced">Advanced</option>
+                    </select>
+                </div>
+            </div>
+        </div>
 
-        <!--Proyectos-->
-        <h2>Projects</h2>
-        <label for="project_name">Project Name:</label>
-        <input type="text" id="project_name" name="project_name"><br><br>
-        <label for="description_project">Project Description:</label>
-        <textarea id="description_project" name="description_project"></textarea><br><br>
-        <label for="technologies_used">Technologies Used:</label>
-        <input type="text" id="technologies_used" name="technologies_used"><br><br>
+        <!-- Proyectos -->
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">Projects</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="project_name" class="form-label">Project Name:</label>
+                    <input type="text" class="form-control" id="project_name" name="project_name">
+                </div>
+                <div class="mb-3">
+                    <label for="description_project" class="form-label">Project Description:</label>
+                    <textarea class="form-control" id="description_project" name="description_project" rows="3"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="technologies_used" class="form-label">Technologies Used:</label>
+                    <input type="text" class="form-control" id="technologies_used" name="technologies_used">
+                </div>
+            </div>
+        </div>
 
-        <!--Certificados-->
-        <h2>Certifications</h2>
-        <label for="title">Certification Name:</label>
-        <input type="text" id="title" name="title"><br><br>
-        <label for="institution_certification">Institution:</label>
-        <input type="text" id="institution_certification" name="institution_certification"><br><br>
-        <label for="date_obtained">Date:</label>
-        <input type="date" id="date_obtained" name="date_obtained" ><br><br>
+        <!-- Certificados -->
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">Certifications</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="title" class="form-label">Certification Name:</label>
+                    <input type="text" class="form-control" id="title" name="title">
+                </div>
+                <div class="mb-3">
+                    <label for="institution_certification" class="form-label">Institution:</label>
+                    <input type="text" class="form-control" id="institution_certification" name="institution_certification">
+                </div>
+                <div class="mb-3">
+                    <label for="date_obtained" class="form-label">Date:</label>
+                    <input type="date" class="form-control" id="date_obtained" name="date_obtained">
+                </div>
+            </div>
+        </div>
 
-        <!--Referencias-->
-        <h2>References</h2>
-        <label for="reference_name">Full Name:</label>
-        <input type="text" id="reference_name" name="reference_name" required><br><br>
-        <label for="relationship">Relationship:</label>
-        <input type="text" id="relationship" name="relationship" required><br><br>
-        <label for="contact_info">Phone Number:</label>
-        <input type="tel" id="contact_info" name="contact_info" required><br><br>
+        <!-- Referencias -->
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">References</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="reference_name" class="form-label">Full Name:</label>
+                    <input type="text" class="form-control" id="reference_name" name="reference_name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="relationship" class="form-label">Relationship:</label>
+                    <input type="text" class="form-control" id="relationship" name="relationship" required>
+                </div>
+                <div class="mb-3">
+                    <label for="contact_info" class="form-label">Phone Number:</label>
+                    <input type="tel" class="form-control" id="contact_info" name="contact_info" required>
+                </div>
+            </div>
+        </div>
 
-        <button type="submit">Create Resume</button>
+        <button type="submit" class="btn btn-success w-100">Create Resume</button>
     </form>
-
-
+</div>
 
 {% endblock content %}

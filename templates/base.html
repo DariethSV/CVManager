@@ -1,15 +1,15 @@
 {% load static %}
 <head>
     <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
-    
 </head>
-<nav class="navbar navbar-expand-lg bg-body-tertiary">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">
-            {% load static %}
-            <img src={% static "images/logo1.png" %} alt="" width="70" height="40" class="d-inline-block align-text-top"/> 
-            CV Manager
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+    <div class="container">
+        <a class="navbar-brand" href="#">
+            <img src="{% static 'images/logo1.png' %}" alt="Logo" width="70" height="30" class="d-inline-block align-text-top"/> 
+            <span class="fw-bold">CV Manager</span>
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -17,12 +17,12 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownProfile" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-person" style="font-size: 24px;"></i> Profile
+                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdownProfile" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user-circle me-2" style="font-size: 24px;"></i> Profile
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownProfile">
-                        <li><a class="dropdown-item" href="">View Profile</a></li>
-                        <li><a class="dropdown-item" href="">Logout</a></li>
+                        <li><a class="dropdown-item" href="{% url 'view_resume' %}">View Resumes</a></li>
+                        <li><a class="dropdown-item" href="#">Logout</a></li>
                     </ul>
                 </li>
             </ul>
@@ -30,23 +30,20 @@
     </div>
 </nav>
 
-<div class="container">
+<div class="container my-4">
     {% block content %}
     {% endblock content %}
 </div>
 
-<footer class="text-center text-lg-start bg-light text-muted mt-4">
+<footer class="text-center bg-light text-muted py-3 border-top">
     <div class="container">
         <div class="row align-items-center">
-            <div class="col-md-4 text-center py-3">
-                <!-- Ajustando los estilos para que los logos estén en línea y centrados -->
-                <div class="d-flex justify-content-center">
-                    <img src="{% static 'images/logo1.png' %}" alt="Logo 1" width="70" height="40">
-                    <img src="{% static 'images/logo2.png' %}" alt="Logo 2" width="70" height="40">
-                </div>
+            <div class="col-md-4 d-flex justify-content-center py-2">
+                <img src="{% static 'images/logo1.png' %}" alt="Logo 1" width="70" height="30" class="me-2">
+                <img src="{% static 'images/logo2.png' %}" alt="Logo 2" width="70" height="40">
             </div>
-            <div class="col-md-8 text-center py-3">
-                <p class="small m-0">© 2024 Copyright - CV Manager - EAFIT - Magneto</p>
+            <div class="col-md-8 py-2">
+                <p class="small mb-0">© 2024 CV Manager - <a href="#" class="text-decoration-none text-primary">EAFIT</a> - <a href="#" class="text-decoration-none text-primary">Magneto</a></p>
             </div>
         </div>
     </div>

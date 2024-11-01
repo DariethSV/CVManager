@@ -18,9 +18,14 @@ def save_resume(request):
     if request.method == 'POST':
         customer = Customer.objects.get(email=user.email)
         full_name = request.POST.get('full_name')
+        id_card = request.POST.get('id_card')
         birth_date = request.POST.get('birth_date')
+        gender = request.POST.get('gender')
         resume_email = request.POST.get('resume_email')
         phone_number = request.POST.get('phone_number')
+        country = request.POST.get('country')
+        city = request.POST.get('city')
+        expected_salary = request.POST.get('expected_salary')
         professional_summary = request.POST.get('professional_summary')
         company_name = request.POST.get('company_name')
         position = request.POST.get('position')
@@ -54,6 +59,7 @@ def save_resume(request):
         reference_name = request.POST.get('reference_name')
         relationship = request.POST.get('relationship')
         contact_info = request.POST.get('contact_info')
+        
 
         print("PERSONAL INFORMATION: ")
         print("FULL NAME: ")
@@ -100,9 +106,14 @@ def save_resume(request):
         resume = Resume(
             customer=customer,
             full_name=full_name,
+            id_card=id_card,
             birth_date=birth_date,
+            gender=gender,
             resume_email=resume_email,
             phone_number=phone_number,
+            country=country,
+            city=city,
+            expected_salary=expected_salary,
             professional_summary=professional_summary,
             company_name=company_name,
             position=position,
@@ -135,13 +146,16 @@ def save_resume(request):
         messages.error(request, 'Authentication failed. Please check your credentials.')
         return render(request, 'create_resume.html')
     
-        
-    
+    pass
+
+def resume_list(request):
+    resumes = Resume.objects.filter(customer=request.user)
+    return render(request, 'show_resume.html', {'resumes': resumes})
+     
     
 def create_resume(request):
     return render(request, 'create_resume.html')
 
 
 
-def show_resume(request):
-    return render(request, 'show_resume.html')
+
