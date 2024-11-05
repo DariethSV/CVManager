@@ -7,5 +7,5 @@ from django.urls import reverse_lazy
 urlpatterns = [
     path('register/', views.register_user, name='register'),
     path('login/', views.login_user, name='login'),
-    path('logout/', auth_views.LogoutView.as_view(next_page=reverse_lazy('login')), name='logout'),
+    path('logout/', views.custom_logout_view, name='logout'),
 ]

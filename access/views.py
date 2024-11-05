@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.hashers import make_password
 import json
 from .models import Admin_Custom_User, Customer
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 
 @csrf_exempt 
 def register_user(request):
@@ -60,5 +60,10 @@ def login_user(request):
         else:
             return JsonResponse({'error':'Email or password incorrects, please check it and try again'})
 
+
+@csrf_exempt
+def custom_logout_view(request):
+    logout(request)
+    return JsonResponse({"message": "Sesión cerrada con éxito"})
 
 
