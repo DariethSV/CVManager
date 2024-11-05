@@ -34,3 +34,7 @@ class Resume(models.Model):
     reference_name = models.CharField(max_length=255, default='')
     relationship = models.CharField(max_length=255, default='')
     contact_info = models.CharField(max_length=255, default='')
+
+class Resume_Uploaded(models.Model):
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='resumes_uploaded')
+    file =  models.FileField(upload_to='resume/')

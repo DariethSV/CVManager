@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 import os
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
-from resumes_manage.models import Resume
+from resumes_manage.models import Resume, Resume_Uploaded
 from access.models import Customer
 import os
 from groq import Groq
@@ -144,7 +144,12 @@ def check_customer_resume(request):
 @csrf_exempt
 def  upload_resume(request):
     if request.method == 'POST' and request.FILES.get('uploaded_resume'):
+        user = request.user
+        if not user.is_authenticated:
+            return  JsonResponse({'error': 'User is not authenticated'}, status=401)
+
         uploaded_file = request.FILES['uploaded_resume']
+        _ = Resume_Uploaded.objects.create(customer=user,file=uploaded_file)
         fs = FileSystemStorage(location=os.path.join(settings.MEDIA_ROOT, 'resumes_saved'))
         filename = fs.save(uploaded_file.name, uploaded_file)  # Guarda el archivo
         file_url = fs.url(filename)
