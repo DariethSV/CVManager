@@ -222,10 +222,22 @@ document.getElementById('log_in_form').addEventListener('submit',  function(even
 // Función de cerrar sesión
 function log_out() {
     // Limpiar el estado de la sesión
-    localStorage.removeItem('user_logged_in');
-    localStorage.removeItem('is_customer');
-    localStorage.removeItem('is_admin');
-    window.location.reload(); 
+    fetch('http://localhost:8000/access/logout/',{
+        method:"POST"
+    })
+    .then(response => {
+        if (response.ok) {
+            localStorage.removeItem('user_logged_in');
+            localStorage.removeItem('is_customer');
+            localStorage.removeItem('is_admin');
+            window.location.reload();
+        } else {
+            console.error("Error al cerrar sesión en el servidor.");
+        }
+    })
+    .catch(error => {
+        console.error("Error al hacer la solicitud de cierre de sesión:", error);
+    });
 }
 
 // Función para crear hoja de vida
@@ -393,25 +405,25 @@ document.getElementById('autocomplete_button').addEventListener('click', async f
         const matched_dict = await match_inputs_info(stored_labels);
         
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        chrome.tabs.sendMessage(tabs[0].id, { type: 'SEND_MATCHED_DICT', data: {matched_dict:matched_dict,dict_labels_inputs:dict_labels_inputs} });
+        chrome.tabs.sendMessage(tabs[0].id, { type: 'SEND_MATCHED_DICT', data: {matched_dict:matched_dict,dict_labels_inputs:dict_labels_inputs} },function(response){
+            Swal.close();  // Cierra el alert de cargando
+            Swal.fire({
+                title: '¡Éxito!',
+                text: 'Formulario autocompletado con éxito.',
+                icon: 'success',
+                confirmButtonText: 'OK',
+                background: '#f0f0f0',
+                confirmButtonColor: '#038b71',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Cerrar el popup cuando se haga clic en "OK"
+                    window.close();
+                }
+            });
         });
-        Swal.close();  // Cierra el alert de cargando
-        Swal.fire({
-            title: '¡Éxito!',
-            text: 'Formulario autocompletado con éxito.',
-            icon: 'success',
-            confirmButtonText: 'OK',
-            background: '#f0f0f0',
-            confirmButtonColor: '#038b71',
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Cerrar el popup cuando se haga clic en "OK"
-                window.close();
-            }
         });
-    } 
-
-    
+        
+    }
 });
 
 

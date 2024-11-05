@@ -17,9 +17,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 input.dispatchEvent(event);
                 }
             }
+            let response = { success: true, data: { processed: true } };
+            sendResponse(response);
     }
     
-    return true;
+    
 });
 
 // Función que limpia los labels
