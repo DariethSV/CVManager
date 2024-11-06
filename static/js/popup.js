@@ -40,7 +40,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-
 // Función que verificar si el cliente ya tiene una hoja de vida
 function check_customer_resume() {
     fetch('http://localhost:8000/api/check_customer_resume/', {
@@ -195,11 +194,6 @@ document.getElementById('create_resume_button').addEventListener('click', functi
     window.open('http://localhost:8000/resume/create_resume/', '_blank');
 });
 
-//Función para mostrar hoja de vida
-document.getElementById('show_resume_button').addEventListener('click', function(){
-    window.open('http://localhost:8000/resume/show_resume/', '_blank');
-});
-
 // Función que envia el documento cargado a Django
 document.getElementById('upload_resume_input').addEventListener('change', function(event) {
     // El evento "change"  se dispara cuando el usuario cambia el valor de un input
@@ -232,3 +226,26 @@ document.getElementById('upload_resume_input').addEventListener('change', functi
         });
     }
 });
+
+// Sección de detección de formularios
+
+document.addEventListener('DOMContentLoaded', function() {
+    chrome.storage.local.get('formDetected', function(result) {
+        if (result.formDetected) {
+            const formContainer = document.getElementById('detected_form_container');
+            const customerViewContainer = document.getElementById('customer_view_container');
+
+            if (customerViewContainer) {
+                customerViewContainer.style.display = 'none';
+            }
+
+            if (formContainer) {
+                formContainer.style.display = 'block';
+            }
+
+
+            chrome.storage.local.remove('formDetected');
+        }
+    });
+});
+
