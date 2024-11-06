@@ -99,17 +99,6 @@ function redirect_to_admin_view(){
 
 }
 
-<<<<<<< HEAD
-//Función que redirige al formulario de inicio de sesión
-function redirect_to_login_form(){
-    const login_form_container = document.getElementById('log_in_form_container');
-    const signup_form_container = document.getElementById('sign_up_form_container');
-    const home_div = document.getElementById('home_div');
-    home_div.style.display = 'none';
-    signup_form_container.style.display='none';
-    login_form_container.style.display='block';
-}
-=======
 // Función que redirecciona a iniciar sesión
 function redirect_to_login_form(){
     const login_form_container = document.getElementById('log_in_form_container');
@@ -121,7 +110,6 @@ function redirect_to_login_form(){
 // Función que obtiene todas las hojas de vida del Cliente
 
 
->>>>>>> 4cceadff554a0dd105cc65806eec81867aa8bafb
 // Función de registro de usuarios
 document.getElementById('sign_up_form').addEventListener('submit',  function(event){
     event.preventDefault();
