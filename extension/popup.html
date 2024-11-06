@@ -1,15 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Cargar Hoja de Vida</title>
+    <title>Extensión CV Manager</title>
+    <script src="popup.js"></script>
 </head>
 <body>
-    <h1>Subir Hoja de Vida</h1>
-    <input type="file" id="resumeFile" accept=".pdf,.docx">
-    <button id="uploadButton">Subir Archivo</button>
-    <p id="statusMessage"></p>
+    <h1>Cargar Hoja de Vida</h1>
+    
+    <!-- Registro e inicio de sesión -->
+    <div id="auth">
+        <h2>Registrarse</h2>
+        <input type="text" id="register_username" placeholder="Usuario">
+        <input type="password" id="register_password" placeholder="Contraseña">
+        <button id="register_button">Registrarse</button>
 
-    <script src="popup.js"></script>
+        <h2>Iniciar sesión</h2>
+        <input type="text" id="login_username" placeholder="Usuario">
+        <input type="password" id="login_password" placeholder="Contraseña">
+        <button id="login_button">Iniciar sesión</button>
+        <button id="logout_button">Cerrar sesión</button>
+    </div>
+
+    <!-- Subir archivo -->
+    <input type="file" id="resume_file">
+    <button id="upload_button">Subir Hoja de Vida</button>
 </body>
 </html>
