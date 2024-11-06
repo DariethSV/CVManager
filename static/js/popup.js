@@ -70,22 +70,15 @@ function redirect_to_customer_view(){
     const customer_view_container = document.getElementById('customer_view_container');
     const login_form_container = document.getElementById('log_in_form_container');
     const has_resume = check_customer_resume();
-    const show_resume_button = document.getElementById('show_resume_button');
-    const create_resume_button = document.getElementById('create_resume_button');
+    const home_button = document.getElementById('home_button');
     const upload_resume = document.getElementById('upload_resume');
     const home_div = document.getElementById('home_div');
     home_div.style.display = 'none';
     customer_view_container.style.display='block';
     login_form_container.style.display='none';
 
-    if(has_resume){
-        show_resume_button.style.display='block';
-    }
-    else{
-        show_resume_button.style.display='none';
-        create_resume_button.style.display='block';
-        upload_resume.style.display='block'
-    }
+    home_button.style.display='block';
+    upload_resume.style.display='block';
 }
 
 // Función que redirecciona a la vista de administrador (puede ver los análisis)
@@ -202,6 +195,9 @@ document.getElementById('log_in_form').addEventListener('submit',  function(even
                         confirmButtonColor: '#038b71',
                     });
                     localStorage.setItem('user_logged_in', 'true');
+                    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+                        chrome.tabs.sendMessage(tabs[0].id, { action: "set_login_status", status: true });
+                    });
                     if(data.customer){
                         localStorage.setItem('is_customer', 'true');
                         redirect_to_customer_view();
@@ -230,6 +226,9 @@ function log_out() {
             localStorage.removeItem('user_logged_in');
             localStorage.removeItem('is_customer');
             localStorage.removeItem('is_admin');
+            chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+                chrome.tabs.sendMessage(tabs[0].id, { action: "set_login_status", status: false });
+            });
             window.location.reload();
         } else {
             console.error("Error al cerrar sesión en el servidor.");
@@ -241,7 +240,7 @@ function log_out() {
 }
 
 // Función para crear hoja de vida
-document.getElementById('create_resume_button').addEventListener('click', function(){
+document.getElementById('home_button').addEventListener('click', function(){
     window.open('http://localhost:8000/resume/create_resume/', '_blank');
 });
 // Función que envia el documento cargado a Django
@@ -342,12 +341,13 @@ async function get_data() {
 // Función que hace match de los inputs names y la información de la base de datos
 async function match_inputs_info(labels) {
     try {
-        const response = await fetch('http://localhost:8000/api/match_inputs_info/', {
+        const response = await fetch('http://localhost:8000/api/strategy_function/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ labels: labels }) 
+            body: JSON.stringify({ labels: labels 
+            }) 
         });
 
         if (!response.ok) {
@@ -399,9 +399,8 @@ document.getElementById('autocomplete_button').addEventListener('click', async f
         }
     });
 
-    const data = await get_data(); 
     const stored_labels = labels
-    if (stored_labels && stored_labels.length > 0) {
+    if (stored_labels && stored_labels.length > 0 ) {
         const matched_dict = await match_inputs_info(stored_labels);
         
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {

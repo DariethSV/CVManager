@@ -20,8 +20,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             let response = { success: true, data: { processed: true } };
             sendResponse(response);
     }
-    
-    
+    else if (request.action === "set_login_status") {
+        localStorage.setItem("user_logged_in", request.status);
+        
+    } 
 });
 
 // Función que limpia los labels
@@ -77,8 +79,8 @@ function get_first_visible_input(label) {
 // Función de detectar formulario 
 function detect_form() {
     const form = document.querySelector('form');
-    
-    if (form && !popup_opened) {
+    const is_user_logged_in = localStorage.getItem('user_logged_in')
+    if (form && !popup_opened && (is_user_logged_in==="true")) {
         setTimeout(() => {
             const visible_labels = get_labels(); // Obtener los labels visibles
             const dict_labels_inputs = create_dict_labels_inputs(visible_labels); 
