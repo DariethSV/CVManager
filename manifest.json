@@ -5,7 +5,8 @@
     "description": "Una extensión para enviar datos a Django",
     "permissions": [
         "storage",
-        "activeTab"
+        "activeTab",
+        "scripting"
     ],
     "host_permissions": [
         "http://localhost:8000/*",
@@ -22,5 +23,11 @@
     ],
     "background": {
         "service_worker": "static/js/service_worker.js"
-    }
+    },
+    "web_accessible_resources": [
+        {
+            "resources": ["static/js/sweetalert2.min.js"],
+            "matches": ["<all_urls>"]
+        }
+    ]
 }

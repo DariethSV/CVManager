@@ -1,4 +1,4 @@
-// Maneja vistas de inicio, iniciar sesión, registro y cierre de sesión
+// Maneja vistas de inicio, iniciar sesión, registro, cierre de sesión, customer views y admin view
 document.addEventListener('DOMContentLoaded', function() {
     const is_logged_in = localStorage.getItem('user_logged_in');
     const is_customer = localStorage.getItem('is_customer');
@@ -46,21 +46,26 @@ function check_customer_resume() {
         method: 'GET',
         credentials: 'include'
     })
-        .then(response => response.json())
-        .then(data => {
-            if (data.has_resume) {
-                return true
-            }
-            else{
-                return false
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Error en la respuesta del servidor: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.has_resume) {
+            return true;
+        } else {
+            return false;
+        }
+    })
+    .catch(error => {
+        console.error('Error en fetch:', error);
     });
 }
 
-// Función que redirecciona a la vista de cliente SIN hoja de vida aún
+
+// Función que redirecciona a la vista de cliente SIN hoja de vida aún o con hoja de vida
 function redirect_to_customer_view(){
     const customer_view_container = document.getElementById('customer_view_container');
     const login_form_container = document.getElementById('log_in_form_container');
@@ -72,10 +77,9 @@ function redirect_to_customer_view(){
     home_div.style.display = 'none';
     customer_view_container.style.display='block';
     login_form_container.style.display='none';
+
     if(has_resume){
         show_resume_button.style.display='block';
-        create_resume_button.style.display='none';
-        upload_resume.style.display='none'
     }
     else{
         show_resume_button.style.display='none';
@@ -90,11 +94,12 @@ function redirect_to_admin_view(){
     const admin_view_container = document.getElementById('admin_view_container');
     const home_div = document.getElementById('home_div');
     home_div.style.display = 'none';
-    login_form.style.display='none';
+    login_form_container.style.display='none';
     admin_view_container.style.display='block';
 
 }
 
+<<<<<<< HEAD
 //Función que redirige al formulario de inicio de sesión
 function redirect_to_login_form(){
     const login_form_container = document.getElementById('log_in_form_container');
@@ -104,6 +109,19 @@ function redirect_to_login_form(){
     signup_form_container.style.display='none';
     login_form_container.style.display='block';
 }
+=======
+// Función que redirecciona a iniciar sesión
+function redirect_to_login_form(){
+    const login_form_container = document.getElementById('log_in_form_container');
+    const sign_up_form_container = document.getElementById('sign_up_form_container');
+    sign_up_form_container.style.display = 'none';
+    login_form_container.style.display='block';
+}
+
+// Función que obtiene todas las hojas de vida del Cliente
+
+
+>>>>>>> 4cceadff554a0dd105cc65806eec81867aa8bafb
 // Función de registro de usuarios
 document.getElementById('sign_up_form').addEventListener('submit',  function(event){
     event.preventDefault();
@@ -127,10 +145,28 @@ document.getElementById('sign_up_form').addEventListener('submit',  function(eve
             }).then( response => response.json())
             .then(data => {
                 if (data.error) {
-                    alert(data.error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: data.error,
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                        background: '#f0f0f0',
+                        confirmButtonColor: '#d33'
+                    });
                 } else {
-                    alert(data.message);
-                    redirect_to_login_form();
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: 'Registro de usuario exitoso',
+                        icon: 'success',
+                        confirmButtonText: 'OK',
+                        background: '#f0f0f0',
+                        confirmButtonColor: '#038b71',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            redirect_to_login_form();
+                        }
+                    });
+                    
                 }
             })
             .catch((error) => {
@@ -159,9 +195,24 @@ document.getElementById('log_in_form').addEventListener('submit',  function(even
             }).then( response => response.json())
             .then(data => {
                 if (data.error) {
-                    alert(data.error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: data.error,
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                        background: '#f0f0f0',
+                        confirmButtonColor: '#d33'
+                    });
                 } else {
-                    alert(data.message);
+                    
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: data.message,
+                        icon: 'success',
+                        confirmButtonText: 'OK',
+                        background: '#f0f0f0',
+                        confirmButtonColor: '#038b71',
+                    });
                     localStorage.setItem('user_logged_in', 'true');
                     if(data.customer){
                         localStorage.setItem('is_customer', 'true');
@@ -183,17 +234,28 @@ document.getElementById('log_in_form').addEventListener('submit',  function(even
 // Función de cerrar sesión
 function log_out() {
     // Limpiar el estado de la sesión
-    localStorage.removeItem('user_logged_in');
-    localStorage.removeItem('is_customer');
-    localStorage.removeItem('is_admin');
-    window.location.reload(); 
+    fetch('http://localhost:8000/access/logout/',{
+        method:"POST"
+    })
+    .then(response => {
+        if (response.ok) {
+            localStorage.removeItem('user_logged_in');
+            localStorage.removeItem('is_customer');
+            localStorage.removeItem('is_admin');
+            window.location.reload();
+        } else {
+            console.error("Error al cerrar sesión en el servidor.");
+        }
+    })
+    .catch(error => {
+        console.error("Error al hacer la solicitud de cierre de sesión:", error);
+    });
 }
 
 // Función para crear hoja de vida
 document.getElementById('create_resume_button').addEventListener('click', function(){
     window.open('http://localhost:8000/resume/create_resume/', '_blank');
 });
-
 // Función que envia el documento cargado a Django
 document.getElementById('upload_resume_input').addEventListener('change', function(event) {
     // El evento "change"  se dispara cuando el usuario cambia el valor de un input
@@ -219,19 +281,32 @@ document.getElementById('upload_resume_input').addEventListener('change', functi
         })
         .then(data => {
             // Maneja la respuesta del servidor
-            alert('Archivo subido exitosamente');
+            Swal.fire({
+                title: '¡Éxito!',
+                text: 'Archivo subido exitosamente',
+                icon: 'success',
+                confirmButtonText: 'OK',
+                background: '#f0f0f0',
+                confirmButtonColor: '#038b71',
+            });
         })
         .catch(error => {
-            alert('Error al subir el archivo:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'Hubo un error en la conexión con el servidor.',
+                icon: 'error',
+                confirmButtonText: 'OK',
+                background: '#f0f0f0',
+                confirmButtonColor: '#d33'
+            });
         });
     }
 });
 
-// Sección de detección de formularios
-
+//Vista al detectar formulario
 document.addEventListener('DOMContentLoaded', function() {
-    chrome.storage.local.get('formDetected', function(result) {
-        if (result.formDetected) {
+    chrome.storage.local.get('form_detected', function(result) {
+        if (result.form_detected) {
             const formContainer = document.getElementById('detected_form_container');
             const customerViewContainer = document.getElementById('customer_view_container');
 
@@ -244,8 +319,123 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
 
-            chrome.storage.local.remove('formDetected');
+            chrome.storage.local.remove('form_detected');
         }
     });
 });
+
+// Función que obtiene la información de la base de datos
+async function get_data() {
+    try {
+        const response = await fetch('http://localhost:8000/api/get_data/', {
+            method: 'GET',
+            credentials: 'include'
+        });
+
+        const data = await response.json();
+
+        if (!data.error) {
+            return data.resume_data; // Retornar los datos si no hay error
+        } else {
+            throw new Error(data.error); // Lanzar un error si hay uno
+        }
+    } catch (error) {
+        Swal.fire({
+            title: 'Error',
+            text: 'Hubo un error en la conexión con el servidor.',
+            icon: 'error',
+            confirmButtonText: 'OK',
+            background: '#f0f0f0',
+            confirmButtonColor: '#d33'
+        });
+    }
+}
+
+// Función que hace match de los inputs names y la información de la base de datos
+async function match_inputs_info(labels) {
+    try {
+        const response = await fetch('http://localhost:8000/api/match_inputs_info/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ labels: labels }) 
+        });
+
+        if (!response.ok) {
+            throw new Error('Error en la respuesta del servidor');
+        }
+
+        const data = await response.json();
+        if (data.success){
+            return data['matched_dict'];
+        }
+        
+    } catch (error) {
+        Swal.fire({
+            title: 'Error',
+            text: 'Hubo un error en la conexión con el servidor.',
+            icon: 'error',
+            confirmButtonText: 'OK',
+            background: '#f0f0f0',
+            confirmButtonColor: '#d33'
+        });
+    }
+}
+
+var labels = [];
+var dict_labels_inputs = {};
+// Función que recoge los inputs detectados en la página
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.type === 'FORM_DATA') {
+        labels = request.data.cleaned_keys;
+        dict_labels_inputs = request.data.dict;
+    }
+});
+
+// Función que detecta cuándo se hace click al botón autocompletar
+document.getElementById('autocomplete_button').addEventListener('click', async function() {
+    const sweet_alert_container = document.getElementById('sweet_alert_container');
+    const form_container = document.getElementById('detected_form_container');
+
+    sweet_alert_container.style.display = 'block'
+    form_container.style.display = 'none'
+
+    Swal.fire({
+        title: 'Autocompletando...',
+        text: 'Por favor, espera mientras autocompletamos el formulario.',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+            Swal.showLoading();  // Muestra el spinner de carga
+        }
+    });
+
+    const data = await get_data(); 
+    const stored_labels = labels
+    if (stored_labels && stored_labels.length > 0) {
+        const matched_dict = await match_inputs_info(stored_labels);
+        
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        chrome.tabs.sendMessage(tabs[0].id, { type: 'SEND_MATCHED_DICT', data: {matched_dict:matched_dict,dict_labels_inputs:dict_labels_inputs} },function(response){
+            Swal.close();  // Cierra el alert de cargando
+            Swal.fire({
+                title: '¡Éxito!',
+                text: 'Formulario autocompletado con éxito.',
+                icon: 'success',
+                confirmButtonText: 'OK',
+                background: '#f0f0f0',
+                confirmButtonColor: '#038b71',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Cerrar el popup cuando se haga clic en "OK"
+                    window.close();
+                }
+            });
+        });
+        });
+        
+    }
+});
+
 
