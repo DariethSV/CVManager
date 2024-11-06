@@ -1,2 +1,5 @@
 django-cors-headers
+django
+python-dotenv
+groq
 reportlab

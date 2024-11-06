@@ -40,3 +40,7 @@ class Resume(models.Model):
     contact_info = models.CharField(max_length=255, default='')
     date_created = models.DateTimeField(auto_now_add=True)
     date_updated = models.DateTimeField(auto_now=True)
+    
+class Resume_Uploaded(models.Model):
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='resumes_uploaded')
+    file =  models.FileField(upload_to='resume/')

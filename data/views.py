@@ -8,40 +8,126 @@ from django.views.decorators.csrf import csrf_exempt
 import os
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
-from resumes_manage.models import Resume
+from resumes_manage.models import Resume, Resume_Uploaded
+from access.models import Customer
+import os
+from groq import Groq
+from dotenv import load_dotenv
+
+load_dotenv('api_keys.env')
+groq_api_key = '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'
+client = Groq(api_key=groq_api_key)
+
+
+
+@csrf_exempt
 @login_required
-@require_POST
-def save_data(request):
-    try:
+def match_inputs_info(request):
+    user = request.user
+    customer = Customer.objects.get(email=user.email)
+    resume = customer.resumes.first()
+    if request.method == 'POST':
         data = json.loads(request.body)
-        name = data.get('name')
-        email = data.get('email')
-        phone = data.get('phone')
+        labels = data['labels']
+        print("LABELS: ",labels)
 
-        if not name or not email:
-            return JsonResponse({'error': 'Faltan datos'}, status=400)
-        
-        Resume.objects.create(
-            name=name,
-            email=email,
-            phone=phone
+        database_fields = ["first_name","surname","birth_date","email","phone_number","professional_summary","company_name","position","start_date","end_date","description","degree","institution","start_date_education","end_date_education","description_education","skill_name","proficiency_level","language","fluency","project_name","description_project","technologies_used","title","institution_certification","date_obtained","reference_name","relationship","contact_info"]
+        prompt = f'''Empareja los términos de la Lista A con los más relacionados de la Lista B. El resultado debe ser un diccionario en formato JSON donde cada término de la Lista A se asocie con el campo más adecuado de la Lista B.
+
+        Lista A: {labels}
+
+        Lista B: {database_fields}
+
+        El diccionario JSON el cual deberá ser compatible para usar la función json.loads() en python, debe tener la siguiente estructura: "Término de A": "Término correspondiente de B". Solo incluye en el resultado aquellos términos que tengan una relación clara y precisa entre ambas listas. Si algún término de la Lista A no tiene una correspondencia clara en la Lista B, no lo incluyas en el diccionario. Utiliza únicamente los términos proporcionados en las listas y asegúrate de que las asociaciones sean precisas y significativas.
+
+        Responde únicamente con el diccionario JSON generado.'''
+        response = client.chat.completions.create(
+        model="gemma2-9b-it",
+        temperature=0,
+        top_p=1,
+        messages=[{
+            "role": "user",
+            "content": prompt
+        }]
         )
-        return JsonResponse({'message': 'Datos guardados correctamente'})
-    except json.JSONDecodeError:
-        return JsonResponse({'erros': 'Error en la decodificación JSON'}, status=400)
+
+        content = response.choices[0].message.content
+        content = content.replace('`','')
+        content = content.replace('json','')
+        content = content.strip()
+        print("PRIMER CONTENT: ",content)
+        try:
+            matched_dict = json.loads(content)
+            print(matched_dict)
+        except json.JSONDecodeError as e:
+            print("ERROR", e)
+        matched_dict_update = {}
+        inputs_not_filled = []
+        for key, value in matched_dict.items():
+            try:
+                if(value):
+                    matched_dict_update[key] = getattr(resume, value)
+            except AttributeError:
+                inputs_not_filled.append(key)
+        
+        print("DICCIONARIO: ",matched_dict_update)
+        print("=========================================================")
+        print("INPUTS NO COMPLETADOS: ",inputs_not_filled)
+
+            
+
+
+        
+        return JsonResponse({'success': 'Datos emparejados', 'matched_dict': matched_dict_update, 'inputs_not_filled':inputs_not_filled})
+
+    return JsonResponse({'error': 'Método no permitido.'}, status=405)
+
     
-
-
+    
+    
+@csrf_exempt
 @login_required
 @require_GET
 def get_data(request):
-
-    try:
-        resume_data = Resume.objects.all().values('name','email', 'phone')
-        return JsonResponse({'resume_data':list(resume_data)})
-    except Exception as e:
-        return JsonResponse({'error':str(e)}, status=500)
-
+    user = request.user
+    customer = Customer.objects.get(email=user.email)
+    # Obtener la primera hoja de vida relacionada con el cliente
+    resume = customer.resumes.first()
+    if resume:
+        resume_data = {
+            'first_name': resume.first_name,
+            'surname': resume.surname,
+            'birth_date': resume.birth_date,
+            'email': resume.email,
+            'phone_number': resume.phone_number,
+            'professional_summary': resume.professional_summary,
+            'company_name': resume.company_name,
+            'position': resume.position,
+            'start_date': resume.start_date,
+            'end_date': resume.end_date,
+            'description': resume.description,
+            'degree': resume.degree,
+            'institution': resume.institution,
+            'start_date_education': resume.start_date_education,
+            'end_date_education': resume.end_date_education,
+            'description_education': resume.description_education,
+            'skill_name': resume.skill_name,
+            'proficiency_level': resume.proficiency_level,
+            'language': resume.language,
+            'fluency': resume.fluency,
+            'project_name': resume.project_name,
+            'description_project': resume.description_project,
+            'technologies_used': resume.technologies_used,
+            'title': resume.title,
+            'institution_certification': resume.institution_certification,
+            'date_obtained': resume.date_obtained,
+            'reference_name': resume.reference_name,
+            'relationship': resume.relationship,
+            'contact_info': resume.contact_info,
+        }
+        return JsonResponse({'resume_data': resume_data})
+    else:
+        return JsonResponse({'error': 'No resume found'}, status=404)
 
 
 def check_customer_resume(request):
@@ -58,7 +144,12 @@ def check_customer_resume(request):
 @csrf_exempt
 def  upload_resume(request):
     if request.method == 'POST' and request.FILES.get('uploaded_resume'):
+        user = request.user
+        if not user.is_authenticated:
+            return  JsonResponse({'error': 'User is not authenticated'}, status=401)
+
         uploaded_file = request.FILES['uploaded_resume']
+        _ = Resume_Uploaded.objects.create(customer=user,file=uploaded_file)
         fs = FileSystemStorage(location=os.path.join(settings.MEDIA_ROOT, 'resumes_saved'))
         filename = fs.save(uploaded_file.name, uploaded_file)  # Guarda el archivo
         file_url = fs.url(filename)
