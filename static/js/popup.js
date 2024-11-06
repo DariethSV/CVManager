@@ -96,6 +96,15 @@ function redirect_to_admin_view(){
 
 }
 
+//Función que redirige al formulario de inicio de sesión
+function redirect_to_login_form(){
+    const login_form_container = document.getElementById('log_in_form_container');
+    const signup_form_container = document.getElementById('sign_up_form_container');
+    const home_div = document.getElementById('home_div');
+    home_div.style.display = 'none';
+    signup_form_container.style.display='none';
+    login_form_container.style.display='block';
+}
 // Función de registro de usuarios
 document.getElementById('sign_up_form').addEventListener('submit',  function(event){
     event.preventDefault();
@@ -183,7 +192,12 @@ function log_out() {
 
 // Función para crear hoja de vida
 document.getElementById('create_resume_button').addEventListener('click', function(){
-    window.open('http://localhost:8000/create_resume/', '_blank');
+    window.open('http://localhost:8000/resume/create_resume/', '_blank');
+});
+
+//Función para mostrar hoja de vida
+document.getElementById('show_resume_button').addEventListener('click', function(){
+    window.open('http://localhost:8000/resume/show_resume/', '_blank');
 });
 
 // Función que envia el documento cargado a Django
