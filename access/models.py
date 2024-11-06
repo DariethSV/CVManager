@@ -2,7 +2,7 @@ from django.db import models
 
 # Create your models here.
 from django.db import models
-
+from resumes_manage.models import Resume, Resume_Uploaded
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import BaseUserManager
@@ -48,7 +48,20 @@ class Custom_User(AbstractUser):
         ]
 
 class Customer(Custom_User):
-    pass
+    resume_used = models.ForeignKey(
+        Resume,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='used_by_customer_resume'
+    )
+    resume_uploaded_used = models.ForeignKey(
+        Resume_Uploaded,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='used_by_customer_uploaded'
+    )
 
 class Admin_Custom_User(Custom_User):
     class Meta:
