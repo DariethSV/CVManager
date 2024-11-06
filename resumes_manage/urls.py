@@ -7,6 +7,7 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('create_resume/', views.create_resume, name='create_resume'),
     path('save_resume/', views.save_resume, name='save_resume'),
+    path('select_resume/', views.select_resume, name='select_resume'),
     path('view_resume/', views.resume_list, name='show_resume'),
     path('resume/<int:id>/delete/', views.delete_resume, name='delete_resume'),
     path('resume/<int:id>/edit/', views.edit_resume, name='edit_resume'),

@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Resumes{% endblock %}
+{% block content %}
+<div class="col-sm-12 col-md-6 col-lg-7 col-xl-7">
+    <h2>Resumes</h2>
+    <div class="table-responsive py-1">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Resume ID</th>
+                    <th>View</th>
+                    <th>Uploaded</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if resumes %}
+                    {% for resume in resumes %}
+                    <tr>
+                        <td>{{ resume.id }}</td>
+                        <td><a href="#">Link</a></td>
+                        <td>{{ resume.is_uploaded }}</td>
+                        
+                        <td>
+                            <div class="btn-group">
+                                <form action="{% url 'select_resume' %}" method="POST">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="resume_id" value="{{ resume.id }}">
+                                    <input type="hidden" name="uploaded" value="{{ resume.is_uploaded }}">
+                                    <button type="submit" class="btn btn-primary ">Select</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="3">No resumes found.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock content %}

@@ -4,17 +4,13 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 import json
 from .models import *
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import render
 from django.contrib import messages
 from access.models import Customer
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
-from django.http import HttpResponse
 
 @login_required
 @require_POST
 @csrf_exempt
-
 def save_resume(request):
     user = request.user
     
@@ -221,3 +217,60 @@ def generate_pdf(request, resume_id):
     p.save()
 
     return response
+
+@login_required
+@csrf_exempt
+def select_resume(request):
+    print("Entrando en select_resume")  # Verificar si la función se llama
+
+    user = request.user
+    try:
+        customer = Customer.objects.get(email=user.email)
+        print("Cliente encontrado:", customer)
+    except Customer.DoesNotExist:
+        print("No se encontró un cliente con el email proporcionado.")
+        return JsonResponse({'error': 'No se encontró el cliente.'}, status=404)
+
+    if request.method == "POST":
+        print("Método POST recibido")  # Confirmar que se detecta el método POST
+        
+        resume_id = request.POST.get('resume_id')
+        is_uploaded = request.POST.get('uploaded') == "True"
+        print("resume_id obtenido:", resume_id)
+        print("¿Es uploaded?:", is_uploaded)
+        print("¿uploaded type?:", type(is_uploaded))
+
+
+        if is_uploaded:
+            resume_uploaded = Resume_Uploaded.objects.filter(id=resume_id, customer=customer).first()
+            print("Resume Uploaded encontrado:", resume_uploaded)
+            if resume_uploaded:
+                customer.resume_used = None
+                customer.resume_uploaded_used = resume_uploaded
+                customer.save()
+                print("CUSTOMER después de asignar resume_uploaded_used:", customer.resume_uploaded_used)
+        else:
+            resume = Resume.objects.filter(id=resume_id, customer=customer).first()
+            print("Resume encontrado:", resume)
+            if resume:
+                customer.resume_used = resume
+                customer.resume_uploaded_used = None
+                customer.save()
+                print("CUSTOMER después de asignar resume_used:", customer.resume_used)
+
+        return redirect('select_resume')
+    
+    else:
+        print("Método GET recibido") 
+        resumes = list(chain(
+            customer.resumes.all().annotate(is_uploaded=Value(False)), 
+            customer.resumes_uploaded.all().annotate(is_uploaded=Value(True))
+        ))
+        print("Resumes obtenidos:", resumes)
+        return render(request, 'select_resume.html', {'resumes': resumes})
+
+
+
+
+            
+

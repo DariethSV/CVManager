@@ -1,12 +1,11 @@
 from django.db import models
-from access.models import Customer
 
 # Create your models here.
 
 class Resume(models.Model):
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='resumes')
-    full_name = models.CharField(max_length=255)
-    id_card = models.CharField(max_length=255, default='')
+    customer = models.ForeignKey('access.Customer', on_delete=models.CASCADE, related_name='resumes')
+    first_name = models.CharField(max_length=255)
+    surname = models.CharField(max_length=255,default='')
     birth_date = models.DateField(default="1900-01-01")
     gender = models.CharField(max_length=255, default='')
     resume_email = models.EmailField()
@@ -42,5 +41,6 @@ class Resume(models.Model):
     date_updated = models.DateTimeField(auto_now=True)
     
 class Resume_Uploaded(models.Model):
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='resumes_uploaded')
+    customer = models.ForeignKey('access.Customer', on_delete=models.CASCADE, related_name='resumes_uploaded')
+    content= models.CharField(max_length=10000,null=True)
     file =  models.FileField(upload_to='resume/')

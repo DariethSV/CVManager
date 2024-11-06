@@ -13,16 +13,79 @@ from access.models import Customer
 import os
 from groq import Groq
 from dotenv import load_dotenv
+import pdfplumber
 
 load_dotenv('api_keys.env')
 groq_api_key = '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'
 client = Groq(api_key=groq_api_key)
 
-
+@csrf_exempt
+@login_required
+def strategy_function(request):
+    print("ENTROOOOOOOOOOO AL ESTRATEGY FUNCTION")
+    user = request.user
+    customer = Customer.objects.get(email=user.email)
+    print("CUSTOMER: ", customer.email)
+    if customer.resume_used:
+        print("RESUME: ", customer.resume_used.id)
+        return match_inputs_info_resume(request)
+    elif customer.resume_uploaded_used:
+        print("RESUME SUBIDO: ", customer.resume_uploaded_used.id)
+        return match_inputs_info_resume_uploaded(request)
 
 @csrf_exempt
 @login_required
-def match_inputs_info(request):
+def match_inputs_info_resume_uploaded(request):
+    user = request.user
+    customer = Customer.objects.get(email=user.email)
+    resume = customer.resume_uploaded_used
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        labels = data['labels']
+        print("LABELS: ",labels)
+
+        prompt = f'''Recibirás una lista de labels de un formulario para aplicar a una oferta de empleo, empareja los términos de la Lista A con la información mejor relacionada del texto B. El resultado debe ser un diccionario en formato JSON donde cada término de la Lista A se asocie con el campo más adecuado del texto B.
+
+        Lista A: {labels}
+
+        Lista B: {resume.content}
+
+        El diccionario JSON el cual deberá ser compatible para usar la función json.loads() en python, debe tener la siguiente estructura: "Término de A": "información correspondiente de B". Solo incluye en el resultado aquellos términos que tengan una relación clara y precisa entre la lista A y el texto B. Si algún término de la Lista A no tiene una correspondencia clara en el texto B, no lo incluyas en el diccionario. Utiliza únicamente los términos proporcionados en las listas y asegúrate de que las asociaciones sean precisas y significativas.
+
+        Responde únicamente con el diccionario JSON generado.'''
+        response = client.chat.completions.create(
+        model="gemma2-9b-it",
+        temperature=0,
+        top_p=1,
+        messages=[{
+            "role": "user",
+            "content": prompt
+        }]
+        )
+
+        content = response.choices[0].message.content
+        content = content.replace('`','')
+        content = content.replace('json','')
+        content = content.strip()
+        try:
+            matched_dict = json.loads(content)
+        except json.JSONDecodeError as e:
+            print("ERROR", e)
+        
+        print("DICCIONARIO: ",matched_dict)
+        print("=========================================================")
+
+            
+
+
+        
+        return JsonResponse({'success': 'Datos emparejados', 'matched_dict': matched_dict})
+
+    return JsonResponse({'error': 'Método no permitido.'}, status=405)
+
+@csrf_exempt
+@login_required
+def match_inputs_info_resume(request):
     user = request.user
     customer = Customer.objects.get(email=user.email)
     resume = customer.resumes.first()
@@ -55,7 +118,6 @@ def match_inputs_info(request):
         content = content.replace('`','')
         content = content.replace('json','')
         content = content.strip()
-        print("PRIMER CONTENT: ",content)
         try:
             matched_dict = json.loads(content)
             print(matched_dict)
@@ -142,16 +204,38 @@ def check_customer_resume(request):
         return JsonResponse({'error': 'User is not a customer'}, status=400)
 
 @csrf_exempt
-def  upload_resume(request):
+def upload_resume(request):
     if request.method == 'POST' and request.FILES.get('uploaded_resume'):
         user = request.user
+        customer = Customer.objects.filter(email=user.email).first()
         if not user.is_authenticated:
-            return  JsonResponse({'error': 'User is not authenticated'}, status=401)
+            return JsonResponse({'error': 'User is not authenticated'}, status=401)
 
         uploaded_file = request.FILES['uploaded_resume']
-        _ = Resume_Uploaded.objects.create(customer=user,file=uploaded_file)
         fs = FileSystemStorage(location=os.path.join(settings.MEDIA_ROOT, 'resumes_saved'))
-        filename = fs.save(uploaded_file.name, uploaded_file)  # Guarda el archivo
-        file_url = fs.url(filename)
-        return JsonResponse({'message': 'Archivo subido exitosamente'})
+        filename = fs.save(uploaded_file.name, uploaded_file)  
+        file_path = os.path.join(fs.location, filename)  
+
+        # Extraer el contenido del PDF
+        content = extract_content_pdf(file_path)
+        print("CONTENIDO DEL PDF: ", content)
+        resume_instance = Resume_Uploaded.objects.create(
+            customer=customer,
+            content=content,
+            file=uploaded_file
+        )
+
+        return JsonResponse({'message': 'Archivo subido exitosamente', 'content': content})
     return JsonResponse({'error': 'No se subió ningún archivo'}, status=400)
+
+def extract_content_pdf(file_path):
+    content = ""
+    try:
+        with pdfplumber.open(file_path) as pdf:
+            for page in pdf.pages:
+                content += page.extract_text() + "\n" 
+    except Exception as e:
+        return f"Error al extraer el contenido del PDF: {str(e)}"
+    
+    return content
+    
