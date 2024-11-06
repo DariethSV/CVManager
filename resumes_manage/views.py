@@ -4,9 +4,12 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 import json
 from .models import *
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 from access.models import Customer
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from django.http import HttpResponse
 
 @login_required
 @require_POST
@@ -156,6 +159,37 @@ def resume_list(request):
 def create_resume(request):
     return render(request, 'create_resume.html')
 
+def delete_resume(request, id):
+    resume = get_object_or_404(Resume, id=id)
+    resume.delete()
+    return redirect('show_resume')
 
+def edit_resume(request, resume_id):
+    resume = get_object_or_404(Resume, id=resume_id)  # Obtén el objeto Resume
+    if request.method == 'POST':
+        # Aquí iría la lógica para manejar el formulario enviado
+        pass
+    context = {
+        'resume': resume  # Envía el objeto Resume al contexto
+    }
+    return render(request, 'edit_resume.html', context)
 
+def generate_pdf(request, resume_id):
+    # Obtén los datos de la hoja de vida del modelo usando el `resume_id`
+    resume = Resume.objects.get(id=resume_id)
+    
+    # Configura la respuesta para enviar un archivo PDF
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'inline; filename="resume_{resume_id}.pdf"'
+    
+    # Crea un canvas para el PDF
+    p = canvas.Canvas(response, pagesize=letter)
+    p.drawString(100, 750, f"Resume of {resume.full_name}")
+    p.drawString(100, 730, f"ID: {resume.id_card}")
+    p.drawString(100, 710, f"Email: {resume.resume_email}")
+    # Agrega aquí más campos según sea necesario
 
+    p.showPage()
+    p.save()
+
+    return response

@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+{% block title %}Edit Resume{% endblock %}
+{% block content %}
+
+<div class="container my-5">
+    <h1 class="text-center mb-4">Edit Resume</h1>
+    <form id="edit_resume_form" action="{% url 'edit_resume' resume.id %}" method="POST">
+        {% csrf_token %}
+        
+        <!-- Información personal -->
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">Personal Information</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="full_name" class="form-label">Full Name:</label>
+                    <input type="text" class="form-control" id="full_name" name="full_name" value="{{ resume.full_name }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="id_card" class="form-label">Id_number:</label>
+                    <input type="text" class="form-control" id="id_card" name="id_card" value="{{ resume.id_card }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="birth_date" class="form-label">Birth Date:</label>
+                    <input type="date" class="form-control" id="birth_date" name="birth_date" value="{{ resume.birth_date }}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="gender" class="form-label">Gender:</label>
+                    <select class="form-select" id="gender" name="gender" value="{{ resume.gender}}" required>
+                        <option value="Female">Female</option>
+                        <option value="Male">Male</option>
+                        
+                    </select>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="resume_email" class="form-label">Email:</label>
+                    <input type="email" class="form-control" id="resume_email" name="resume_email" value="{{ resume.resume_email }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="phone_number" class="form-label">Phone Number:</label>
+                    <input type="tel" class="form-control" id="phone_number" name="phone_number" value="{{ resume.phone_number}}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="country" class="form-label">Country:</label>
+                    <input type="text" class="form-control" id="country" name="country" value="{{ resume.country}}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="city" class="form-label">City:</label>
+                    <input type="text" class="form-control" id="city" name="city" value="{{ resume.city }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="expected_salary" class="form-label">Expected Salary:</label>
+                    <input type="text" class="form-control" id="expected_salary" name="expected_salary" value="{{ resume.expected_salary }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="professional_summary" class="form-label">Professional Summary:</label>
+                    <textarea class="form-control" id="professional_summary" name="professional_summary" rows="3" value="{{ resume.professional_summary }}" required></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Experiencia laboral -->
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">Work Experience</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="company_name" class="form-label">Company Name:</label>
+                    <input type="text" class="form-control" id="company_name" name="company_name" value="{{ resume.company_name }}">
+                </div>
+                <div class="mb-3">
+                    <label for="position" class="form-label">Position:</label>
+                    <input type="text" class="form-control" id="position" name="position" value="{{ resume.position }}">
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="start_date" class="form-label">Start Date:</label>
+                        <input type="date" class="form-control" id="start_date" name="start_date" value="{{ resume.start_date }}">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="end_date" class="form-label">End Date:</label>
+                        <input type="date" class="form-control" id="end_date" name="end_date" value="{{ resume.end_date }}">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="description" class="form-label">Work Summary:</label>
+                    <textarea class="form-control" id="description" name="description" rows="3" value="{{ resume.description }}"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Educación -->
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">Education</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="degree" class="form-label">Degree:</label>
+                    <input type="text" class="form-control" id="degree" name="degree" value="{{ resume.degree }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="institution" class="form-label">Institution:</label>
+                    <input type="text" class="form-control" id="institution" name="institution" value="{{ resume.institution }}" required>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="start_date_education" class="form-label">Start Date:</label>
+                        <input type="date" class="form-control" id="start_date_education" name="start_date_education" value="{{ resume.start_date_education }}" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="end_date_education" class="form-label">End Date:</label>
+                        <input type="date" class="form-control" id="end_date_education" name="end_date_education" value="{{ resume.end_date_education }}">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="description_education" class="form-label">Education Summary:</label>
+                    <textarea class="form-control" id="description_education" name="description_education" rows="3" value="{{ resume.description_education }}"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Habilidades -->
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">Skills</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="skills" class="form-label">Skills:</label>
+                    <input type="text" class="form-control" id="skills" name="skills" value="{{ resume.skills }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="proficiency_level" class="form-label">Skill Level:</label>
+                    <select class="form-select" id="proficiency_level" name="proficiency_level"  value="{{ resume.proficiency_level }}"  required>
+                        <option value="Beginner">Beginner</option>
+                        <option value="Intermediate">Intermediate</option>
+                        <option value="Advanced">Advanced</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Idiomas -->
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">Languages</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="language" class="form-label">Language:</label>
+                    <input type="text" class="form-control" id="language" name="language" value="{{ resume.language }}">
+                </div>
+                <div class="mb-3">
+                    <label for="fluency" class="form-label">Fluency:</label>
+                    <select class="form-select" id="fluency" name="fluency" value="{{ resume.fluency }}">
+                        <option value="Beginner">Beginner</option>
+                        <option value="Intermediate">Intermediate</option>
+                        <option value="Advanced">Advanced</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Proyectos -->
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">Projects</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="project_name" class="form-label">Project Name:</label>
+                    <input type="text" class="form-control" id="project_name" name="project_name" value="{{ resume.project_name }}">
+                </div>
+                <div class="mb-3">
+                    <label for="description_project" class="form-label">Project Description:</label>
+                    <textarea class="form-control" id="description_project" name="description_project" rows="3" value="{{ resume.description_project }}"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="technologies_used" class="form-label">Technologies Used:</label>
+                    <input type="text" class="form-control" id="technologies_used" name="technologies_used" value="{{ resume.technologies_used }}">
+                </div>
+            </div>
+        </div>
+
+        <!-- Certificados -->
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">Certifications</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="title" class="form-label">Certification Name:</label>
+                    <input type="text" class="form-control" id="title" name="title" value="{{ resume.title }}">
+                </div>
+                <div class="mb-3">
+                    <label for="institution_certification" class="form-label">Institution:</label>
+                    <input type="text" class="form-control" id="institution_certification" name="institution_certification" value="{{ resume.institution_certification }}">
+                </div>
+                <div class="mb-3">
+                    <label for="date_obtained" class="form-label">Date:</label>
+                    <input type="date" class="form-control" id="date_obtained" name="date_obtained" value="{{ resume.date_obtained }}">
+                </div>
+            </div>
+        </div>
+
+        <!-- Referencias -->
+        <div class="card mb-4">
+            <div class="card-header bg-dark text-white">References</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="reference_name" class="form-label">Full Name:</label>
+                    <input type="text" class="form-control" id="reference_name" name="reference_name" value="{{ resume.reference_name }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="relationship" class="form-label">Relationship:</label>
+                    <input type="text" class="form-control" id="relationship" name="relationship" value="{{ resume.relationship }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="contact_info" class="form-label">Phone Number:</label>
+                    <input type="tel" class="form-control" id="contact_info" name="contact_info" value="{{ resume.contact_info }}" required>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-success w-100">Save Changes</button>
+    </form>
+</div>
+
+{% endblock content %}
