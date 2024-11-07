@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "Mi Extensión",
+    "name": "CV Manager",
     "version": "1.0",
     "description": "Una extensión para enviar datos a Django",
     "permissions": [
