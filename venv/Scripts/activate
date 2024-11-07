@@ -35,7 +35,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="C:\Users\Default\Documents\Extension_CV_manage\CVManager\venv"
+VIRTUAL_ENV="C:\Users\Default\Favorites\Extension_CV_manage\CVManager\venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"

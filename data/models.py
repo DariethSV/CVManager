@@ -1,12 +1,13 @@
-from django.db import models  # <-- Asegúrate de que esta línea esté presente
-from django.conf import settings
+# data/models.py
+from django.db import models
+from access.models import Custom_User, Customer
 
 class Resume(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
-    name = models.CharField(max_length=100, default="Nombre desconocido")
-    email = models.EmailField(null=True, blank=True)
-    phone = models.CharField(max_length=20, null=True, blank=True)
-    uploaded_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(Custom_User, on_delete=models.CASCADE, related_name='resumes')
+    title = models.CharField(max_length=255)
+    content = models.TextField()
 
-    def __str__(self):
-        return f"{self.user.username if self.user else 'Sin Usuario'} - {self.name}"
+class Resume_Uploaded(models.Model):
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='uploaded_resumes')
+    file = models.FileField(upload_to='uploads/')
+    content = models.TextField()

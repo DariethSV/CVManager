@@ -1,37 +1,41 @@
-from django.http import HttpResponse # type: ignore
-from django.http import JsonResponse # type: ignore
-from django.views.decorators.csrf import csrf_exempt # type: ignore
-from django.core.files.storage import FileSystemStorage # type: ignore
-from django.conf import settings # type: ignore
-from .models import Resume
+# Librerías estándar de Python 
 import os
 import json
-import PyPDF2 # type: ignore
-from docx import Document # type: ignore
-import re
-import spacy # type: ignore
-from nltk.corpus import stopwords # type: ignore
-import nltk
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from django.views.decorators.http import require_POST,require_GET
-import json
-from django.middleware.csrf import get_token
-from django.views.decorators.csrf import csrf_exempt
-import os
-from django.conf import settings
-from django.core.files.storage import FileSystemStorage
-from resumes_manage.models import Resume, Resume_Uploaded
-from access.models import Customer
-import os
-from groq import Groq
-from dotenv import load_dotenv
-import pdfplumber
+import re  # type: ignore
 
+# Librerías de terceros (requieren instalación con pip)
+import PyPDF2  # type: ignore
+from docx import Document  # type: ignore
+import spacy  
+import pdfplumber  
+from dotenv import load_dotenv  
+from groq import Groq  
+from nltk.corpus import stopwords
+import nltk 
+
+# Librerías de Django
+from django.http import HttpResponse, JsonResponse  
+from django.views.decorators.csrf import csrf_exempt  
+from django.core.files.storage import FileSystemStorage  
+from django.conf import settings  
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_GET
+from django.middleware.csrf import get_token
+
+# Modelos de Django del proyecto
+from .models import Resume
+from resumes_manage.models import Resume_Uploaded
+from access.models import Customer
+# Configuración de la API de Groq
 load_dotenv('api_keys.env')
 groq_api_key = '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'
 client = Groq(api_key=groq_api_key)
+
+# Inicialización de NLTK y spaCy
+nltk.download('stopwords')
+stop_words = set(stopwords.words('spanish'))
+nlp = spacy.load("es_core_news_sm")
+
 
 @csrf_exempt
 @login_required
@@ -253,8 +257,7 @@ def extract_content_pdf(file_path):
     
     return content
     
-# Cargar el modelo en español de spaCy
-nlp = spacy.load("es_core_news_sm")
+
 
 def extract_text(file_path, file_type):
     """Extrae texto del archivo dependiendo de su tipo."""
