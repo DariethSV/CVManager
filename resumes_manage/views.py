@@ -164,3 +164,8 @@ def select_resume(request):
 
             
 
+from django.shortcuts import render
+
+# Create your views here.
+
+
