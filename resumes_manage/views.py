@@ -10,6 +10,9 @@ from access.models import Customer
 from itertools import chain
 from django.db.models import Value
 from django.db.models.functions import Concat
+from django.shortcuts import render
+
+# Create your views here.
 @login_required
 @require_POST
 @csrf_exempt
@@ -163,9 +166,5 @@ def select_resume(request):
 
 
             
-
-from django.shortcuts import render
-
-# Create your views here.
 
 

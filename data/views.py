@@ -1,3 +1,17 @@
+from django.http import HttpResponse # type: ignore
+from django.http import JsonResponse # type: ignore
+from django.views.decorators.csrf import csrf_exempt # type: ignore
+from django.core.files.storage import FileSystemStorage # type: ignore
+from django.conf import settings # type: ignore
+from .models import Resume
+import os
+import json
+import PyPDF2 # type: ignore
+from docx import Document # type: ignore
+import re
+import spacy # type: ignore
+from nltk.corpus import stopwords # type: ignore
+import nltk
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -239,20 +253,6 @@ def extract_content_pdf(file_path):
     
     return content
     
-from django.http import HttpResponse # type: ignore
-from django.http import JsonResponse # type: ignore
-from django.views.decorators.csrf import csrf_exempt # type: ignore
-from django.core.files.storage import FileSystemStorage # type: ignore
-from django.conf import settings # type: ignore
-from .models import Resume
-import os
-import json
-import PyPDF2 # type: ignore
-from docx import Document # type: ignore
-import re
-import spacy # type: ignore
-from nltk.corpus import stopwords # type: ignore
-
 # Cargar el modelo en español de spaCy
 nlp = spacy.load("es_core_news_sm")
 
@@ -274,7 +274,7 @@ def extract_text(file_path, file_type):
 nlp = spacy.load("es_core_news_sm")
 
 # Cargar stopwords de NLTK para español
-import nltk
+
 nltk.download('stopwords')
 stop_words = set(stopwords.words('spanish'))
 
