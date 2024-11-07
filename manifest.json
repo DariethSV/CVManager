@@ -1,0 +1,12 @@
+{
+    "manifest_version": 3,
+    "name": "Carga de Hoja de Vida",
+    "version": "1.0",
+    "description": "Sube tu hoja de vida y guarda su contenido en JSON.",
+    "action": {
+        "default_popup": "popup.html"
+    },
+    "permissions": [
+        "storage"
+    ]
+}
