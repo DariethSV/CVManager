@@ -4,8 +4,9 @@ from django.db import models
 
 class Resume(models.Model):
     customer = models.ForeignKey('access.Customer', on_delete=models.CASCADE, related_name='resumes')
-    first_name = models.CharField(max_length=255)
+    first_name = models.CharField(max_length=255, null=False)
     surname = models.CharField(max_length=255,default='')
+    id_card = models.CharField(max_length=255, default='')
     birth_date = models.DateField(default="1900-01-01")
     gender = models.CharField(max_length=255, default='')
     resume_email = models.EmailField()

@@ -1,12 +1,18 @@
-from django.http import JsonResponse
+from itertools import chain
+from multiprocessing import Value
+from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
-import json
 from .models import *
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib import messages
 from access.models import Customer
+from itertools import chain
+from django.db.models import Value
+from django.db.models.functions import Concat
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
 
 @login_required
 @require_POST
@@ -16,7 +22,8 @@ def save_resume(request):
     
     if request.method == 'POST':
         customer = Customer.objects.get(email=user.email)
-        full_name = request.POST.get('full_name')
+        first_name = request.POST.get('first_name')
+        surname = request.POST.get('surname')
         id_card = request.POST.get('id_card')
         birth_date = request.POST.get('birth_date')
         gender = request.POST.get('gender')
@@ -62,7 +69,7 @@ def save_resume(request):
 
         print("PERSONAL INFORMATION: ")
         print("FULL NAME: ")
-        print(full_name)
+        print(first_name)
         print("BIRTH DATE: ")
         print(birth_date)
         print("RESUME EMAIL: ")
@@ -104,7 +111,8 @@ def save_resume(request):
             
         resume = Resume(
             customer=customer,
-            full_name=full_name,
+            first_name=first_name,
+            surname=surname,
             id_card=id_card,
             birth_date=birth_date,
             gender=gender,
@@ -155,42 +163,38 @@ def resume_list(request):
 def create_resume(request):
     return render(request, 'create_resume.html')
 
-def delete_resume(request, id):
-    resume = get_object_or_404(Resume, id=id)
-    resume.delete()
-    return redirect('show_resume')
+def delete_resume(request, resume_id):
+    if request.method == "POST":
+        resume = get_object_or_404(Resume_Uploaded, id=resume_id)
+        resume.delete()
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
 
-def edit_resume(request, resume_id):
+def edit_resume(request, id):
+    # Obtén el objeto Resume con el ID dado
     resume = get_object_or_404(Resume, id=id)
 
     if request.method == 'POST':
-        # Obtener los datos del formulario
-        full_name = request.POST.get('full_name')
-        experience = request.POST.get('experience')
-        education = request.POST.get('education')
-        skills = request.POST.get('skills')
-        
+        # Lista de todos los campos que se pueden actualizar
+        fields = [
+            'first_name', 'id_card', 'birth_date', 'phone_number', 'resume_email', 'country', 'city',
+            'expected_salary', 'professional_summary', 'company_name', 'position', 'start_date', 'end_date',
+            'description', 'degree', 'institution', 'start_date_education', 'end_date_education',
+            'description_education', 'skill_name', 'proficiency_level', 'language', 'fluency', 'project_name',
+            'description_project', 'technologies_used', 'title', 'institution_certification', 'date_obtained',
+            'reference_name', 'relationship', 'contact_info'
+        ]
+
+        for field in fields:
+            value = request.POST.get(field)
+            if value:  # Solo actualiza si el valor no está vacío
+                setattr(resume, field, value)
+
+        # Guarda los cambios en la base de datos
+        resume.save()
 
         
-        if full_name:
-           
-            resume.full_name = full_name
-            resume.experience = experience
-            resume.education = education
-            resume.skills = skills
-            resume.save()  
-
-            return redirect('resume_detail', id=resume.id)  
-
-        else:
-            # Mostrar un mensaje de error si los campos obligatorios no están completos
-            context = {
-                'resume': resume,
-                'error_message': 'Los campos Nombre completo y Título de trabajo son obligatorios.'
-            }
-            return render(request, 'edit_resume.html', context)
-
-
+        return redirect('show_resume') 
     context = {
         'resume': resume,
     }
@@ -208,7 +212,7 @@ def generate_pdf(request, resume_id):
     
     # Se crea un canvas para el PDF
     p = canvas.Canvas(response, pagesize=letter)
-    p.drawString(100, 750, f"Resume of {resume.full_name}")
+    p.drawString(100, 750, f"Resume of {resume.first_name}")
     p.drawString(100, 730, f"ID: {resume.id_card}")
     p.drawString(100, 710, f"Email: {resume.resume_email}")
     p.drawString(100, 690, f"Phone: {resume.phone_number}")

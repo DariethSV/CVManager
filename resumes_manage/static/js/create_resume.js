@@ -1,12 +1,29 @@
-// This file contains the JavaScript code for the create_resume.html template.
-
-function showConfirmationModal() {
-    // Muestra el modal de confirmación
-    var confirmationModal = new bootstrap.Modal(document.getElementById('confirmationModal'));
-    confirmationModal.show();
+// Función para mostrar el modal de confirmación de eliminación
+function showConfirmationModal(resumeId) {
+    window.selectedResumeId = resumeId;
 }
 
-function confirmDeletion() {
-    // Envía el formulario cuando se confirma la eliminación
-    document.getElementById('deleteForm').submit();
+// Función que se ejecuta al confirmar la eliminación
+function confirmDeletion(resumeId) {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+    fetch(`/resume/${resumeId}/delete/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            
+            alert("Resume deleted successfully");
+            location.reload(); 
+        } else {
+            alert("Error deleting resume");
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+    });
 }
