@@ -1,0 +1,13 @@
+{
+    "name": null,
+    "surname": null,
+    "age": "19",
+    "profession": "Director",
+    "experience": null,
+    "contact_info": {
+        "email": null,
+        "phone": "3127577480"
+    },
+    "education": "Ingeniería",
+    "skills": null
+}
