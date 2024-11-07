@@ -1,16 +1,16 @@
-from django.http import HttpResponse
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.core.files.storage import FileSystemStorage
-from django.conf import settings
+from django.http import HttpResponse # type: ignore
+from django.http import JsonResponse # type: ignore
+from django.views.decorators.csrf import csrf_exempt # type: ignore
+from django.core.files.storage import FileSystemStorage # type: ignore
+from django.conf import settings # type: ignore
 from .models import Resume
 import os
 import json
-import PyPDF2
-from docx import Document
+import PyPDF2 # type: ignore
+from docx import Document # type: ignore
 import re
-import spacy
-from nltk.corpus import stopwords
+import spacy # type: ignore
+from nltk.corpus import stopwords # type: ignore
 
 # Cargar el modelo en español de spaCy
 nlp = spacy.load("es_core_news_sm")
