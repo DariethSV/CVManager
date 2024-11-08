@@ -333,17 +333,23 @@ def save_applied_page(request):
 
 @login_required
 def check_user_role(request):
+    print("ENTROOOOOOOOOOO en check_user_role")  # Verificar si la función se llama
     # Verifica si el usuario es un superusuario (administrador)
+    
+    
     if request.user.is_superuser:
         role = 'admin'
+        print("El usuario es un superusuario (administrador)")
     
     # Verifica si el usuario es el usuario específico
     elif request.user.username == 'admin@gmail.com':   
         role = 'specific_user'
+        print("El usuario es el usuario específico")
     
     # Si no es ni admin ni el usuario específico, es un usuario regular
     else:
         role = 'regular_user'
+        print("El usuario es un usuario regular")
     
     # Retorna el rol en formato JSON para que la extensión lo use
     return JsonResponse({'role': role})
