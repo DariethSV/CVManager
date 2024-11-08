@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const is_logged_in = localStorage.getItem('user_logged_in');
     const is_customer = localStorage.getItem('is_customer');
     const log_out_button = document.getElementById('log_out_button');
+    const log_out_button_ad = document.getElementById('log_out_button_ad');
     const login_button_home = document.getElementById('log_in_button_home');
     const signup_button_home = document.getElementById('sign_up_button_home');
     const home_div = document.getElementById('home_div');
@@ -13,6 +14,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (log_out_button) {
         log_out_button.addEventListener('click', log_out);
     }
+
+   
 
     // Redirección basada en estado de autenticación
     if (is_logged_in) {
@@ -89,6 +92,12 @@ function redirect_to_admin_view(){
     home_div.style.display = 'none';
     login_form_container.style.display='none';
     admin_view_container.style.display='block';
+    const admin_view = document.getElementById('admin_view');
+    const log_out_button_ad = document.getElementById('log_out_button_ad');
+
+    if (log_out_button_ad) {
+        log_out_button_ad.addEventListener('click', log_out);
+    }
 
 }
 
@@ -249,10 +258,10 @@ document.getElementById('home_button').addEventListener('click', function() {
     .then(data => {
         if (data.role === 'admin') {
             // Redirige a la página del administrador
-            window.open('http://localhost:8000/admin_dashboard/', '_blank'); 
+            window.open('http://localhost:8000/resume/admin_dashboard/', '_blank'); 
         } else if (data.role === 'specific_user') {
             // Redirige a una página para el usuario específico
-            window.open('http://localhost:8000/admin_dashboard/', '_blank');  
+            window.open('http://localhost:8000/resume/admin_dashboard/', '_blank');  
         } else {
             // Redirige a la página regular
             window.open('http://localhost:8000/resume/view_resume/', '_blank');
@@ -522,3 +531,7 @@ chrome.storage.local.get('pageInfo', (result) => {
 });
 
 
+document.getElementById('admin_view').addEventListener('click', () => {
+    // Redirigir a la página de administración
+    window.open('http://127.0.0.1:8000/resume/admin_dashboard/', '_blank');
+});
