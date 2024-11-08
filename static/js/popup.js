@@ -92,7 +92,6 @@ function redirect_to_admin_view(){
     home_div.style.display = 'none';
     login_form_container.style.display='none';
     admin_view_container.style.display='block';
-    const admin_view = document.getElementById('admin_view');
     const log_out_button_ad = document.getElementById('log_out_button_ad');
 
     if (log_out_button_ad) {
@@ -205,7 +204,7 @@ document.getElementById('log_in_form').addEventListener('submit',  function(even
                     });
                     localStorage.setItem('user_logged_in', 'true');
                     chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-                        chrome.tabs.sendMessage(tabs[0].id, { action: "set_login_status", status: true });
+                        chrome.tabs.sendMessage(tabs[0].id, { type: "set_login_status", status: true });
                     });
                     if(data.customer){
                         localStorage.setItem('is_customer', 'true');
@@ -322,6 +321,8 @@ document.getElementById('upload_resume_input').addEventListener('change', functi
     }
 });
 
+
+
 //Vista al detectar formulario
 document.addEventListener('DOMContentLoaded', function() {
     chrome.storage.local.get('form_detected', function(result) {
@@ -342,6 +343,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+
 
 // Función que obtiene la información de la base de datos
 async function get_data() {
@@ -458,77 +461,22 @@ document.getElementById('autocomplete_button').addEventListener('click', async f
 });
 
 
-function getUserEmail() {
-    return fetch('http://localhost:8000/resume/api/get_user_email/', {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.email) {
-            return data.email;
-        } else {
-            console.error('Error al obtener el correo del usuario:', data);
-            return null;
-        }
-    })
-    .catch(error => {
-        console.error('Error en la solicitud de correo:', error);
-        return null;
-    });
-}
 
-
+// Evento para el botón de autocompletar
 document.getElementById('autocomplete_button').addEventListener('click', () => {
-    getUserEmail().then(customer_email => {
-        if (customer_email) {
-            const pageInfo = {
-                name_page: document.title,
-                url_page: window.location.href,
-                customer_email: customer_email  // Usa el correo obtenido
-            };
-
-            // Llama a saveAppliedPage con la información completa
-            saveAppliedPage(pageInfo.name_page, pageInfo.url_page, pageInfo.customer_email);
-        } else {
-            console.error('No se pudo obtener el correo del usuario autenticado.');
-        }
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        chrome.tabs.sendMessage(tabs[0].id, { action: "start_autocomplete" }, (response) => {
+            if (response && response.status === 'success') {
+                console.log('Información de la página recolectada y guardada con éxito:', response.pageInfo);
+                alert('Información de la página recolectada y guardada.');
+            } else {
+                console.error('No se pudo recolectar la información de la página:', response ? response.message : "Respuesta nula");
+                alert('Error al recolectar la información de la página: ' + (response ? response.message : "Respuesta nula"));
+            }
+        });
     });
 });
 
-
-function saveAppliedPage(name_page, url_page, customer_email) {
-    fetch('http://localhost:8000/resume/api/save_applied_page/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            name_page: name_page,
-            url_page: url_page,
-            customer_email: customer_email  
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            console.log('Página aplicada guardada con éxito:', data.applied_page_id);
-        } else {
-            console.error('Error al guardar la página aplicada:', data);
-        }
-    })
-    .catch(error => {
-        console.error('Error en la solicitud:', error);
-    });
-}
-
-
-
-chrome.storage.local.get('pageInfo', (result) => {
-    console.log('Datos almacenados en chrome.storage.local:', result.pageInfo);
-});
 
 
 document.getElementById('admin_view').addEventListener('click', () => {

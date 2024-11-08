@@ -20,7 +20,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             let response = { success: true, data: { processed: true } };
             sendResponse(response);
     }
-    else if (request.action === "set_login_status") {
+    else if (request.type === "set_login_status") {
         localStorage.setItem("user_logged_in", request.status);
         
     } 
@@ -80,7 +80,7 @@ function get_first_visible_input(label) {
 function detect_form() {
     const form = document.querySelector('form');
     const is_user_logged_in = localStorage.getItem('user_logged_in')
-    if (form && !popup_opened && (is_user_logged_in==="true")) {
+    if (form && !popup_opened) {
         setTimeout(() => {
             const visible_labels = get_labels(); // Obtener los labels visibles
             const dict_labels_inputs = create_dict_labels_inputs(visible_labels); 
@@ -129,28 +129,91 @@ if (!detect_form()) {
     });
 }
 
+// Función para guardar la página aplicada en el servidor
+function saveAppliedPage(name_page, url_page, customer_email) {
+    fetch('http://localhost:8000/resume/api/save_applied_page/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            name_page: name_page,
+            url_page: url_page,
+            customer_email: customer_email  
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('Página aplicada guardada con éxito:', data.applied_page_id);
+        } else {
+            console.error('Error al guardar la página aplicada:', data);
+        }
+    })
+    .catch(error => {
+        console.error('Error en la solicitud:', error);
+    });
+}
+
+// Función para obtener el correo electrónico del usuario autenticado
+function getUserEmail() {
+    return fetch('http://localhost:8000/resume/api/get_user_email/', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        credentials: 'include'  // Intenta incluir las cookies de sesión en la solicitud
+    })
+    .then(response => {
+        if (!response.ok) {
+            console.warn('No se pudo obtener el correo del usuario, dejando el valor vacío.');
+            return "";  // Retorna una cadena vacía si hay un problema con la autenticación
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data && data.email) {
+            console.log("Correo obtenido:", data.email);
+            return data.email;
+        } else {
+            console.warn('Campo "email" ausente en la respuesta de la API, usando valor vacío.');
+            return "";  // Retorna una cadena vacía si no se encuentra el campo "email"
+        }
+    })
+    .catch(error => {
+        console.error('Error en la solicitud de correo:', error);
+        return "";  // Retorna una cadena vacía en caso de error en la solicitud
+    });
+}
 
 
+
+
+// Escucha el mensaje de autocompletar desde el popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.action === 'collectPageInfo') {
-        console.log("Mensaje recibido en content.js para recolectar información.");
+    if (message.action === "start_autocomplete") {
+        console.log("Mensaje recibido en content.js para iniciar autocompletado.");
 
-        const pageInfo = {
-            title: document.title,
-            url: window.location.href
-        };
-        saveAppliedPage(pageInfo.name_page, pageInfo.url_page, pageInfo.customer_email);
-        console.log('Información de la página recolectada:', pageInfo);
-        // Almacena la información en chrome.storage
-        chrome.storage.local.set({ pageInfo }, () => {
-            console.log('Información de la página almacenada:', pageInfo); // Este mensaje debería aparecer si el almacenamiento se ejecuta correctamente.
-        });
-        chrome.storage.local.set({ pageInfo }, () => {
-            chrome.storage.local.get('pageInfo', (result) => {
-                console.log('Verificación inmediata de datos en storage:', result.pageInfo);
+        getUserEmail().then(customer_email => {
+            const pageInfo = {
+                name_page: document.title,
+                url_page: window.location.href,
+                customer_email: customer_email  // Aquí podría ser una cadena vacía
+            };
+
+            // Guarda la información en el servidor
+            saveAppliedPage(pageInfo.name_page, pageInfo.url_page, pageInfo.customer_email);
+
+            // Almacena la información en chrome.storage
+            chrome.storage.local.set({ pageInfo }, () => {
+                console.log('Información de la página almacenada en chrome.storage:', pageInfo);
             });
+
+            // Envía la respuesta de éxito al popup
+            sendResponse({ status: 'success', pageInfo });
         });
-        sendResponse({ status: 'success', pageInfo });
+
+        // Indica que la respuesta será enviada de manera asincrónica
+        return true;
     }
 });
-
