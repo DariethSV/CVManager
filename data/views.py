@@ -21,6 +21,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_GET
 from django.middleware.csrf import get_token
+from django.http import JsonResponse
 
 # Modelos de Django del proyecto
 from .models import Resume
@@ -171,9 +172,13 @@ def match_inputs_info_resume(request):
 def get_data(request):
     user = request.user
     customer = Customer.objects.get(email=user.email)
+    
     # Obtener la primera hoja de vida relacionada con el cliente
     resume = customer.resumes.first()
+    
+    # Verificar si el cliente tiene un resumen guardado
     if resume:
+        # Extraer los datos de la hoja de vida
         resume_data = {
             'first_name': resume.first_name,
             'surname': resume.surname,
@@ -205,19 +210,26 @@ def get_data(request):
             'relationship': resume.relationship,
             'contact_info': resume.contact_info,
         }
-        return JsonResponse({'resume_data': resume_data})
+
+        # Crear lista de advertencias para los campos vacíos
+        warnings = []
+        for field, value in resume_data.items():
+            if not value:  # Si el valor está vacío o es None
+                warnings.append(f"El campo '{field}' no tiene información.")
+
+        # Enviar los datos del resumen y las advertencias
+        return JsonResponse({'resume_data': resume_data, 'warnings': warnings})
+
     else:
+        # Retorna error si no se encuentra una hoja de vida
         return JsonResponse({'error': 'No resume found'}, status=404)
 
 
 def check_customer_resume(request):
     user = request.user
-    if user.is_authenticated and hasattr(request.user, "customer"):
+    if user.is_authenticated and hasattr(user, "customer"):
         has_resume = Resume.objects.filter(customer=user).exists()
-        if has_resume:
-            return JsonResponse({'has_resume': True})
-        else:
-            return JsonResponse({'has_resume': False})
+        return JsonResponse({'has_resume': has_resume})
     else:
         return JsonResponse({'error': 'User is not a customer'}, status=400)
 

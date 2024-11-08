@@ -1,11 +1,9 @@
 from django.db import models
 
-# Create your models here.
-
 class Resume(models.Model):
-    customer = models.ForeignKey('access.Customer', on_delete=models.CASCADE, related_name='resumes')
+    customer = models.ForeignKey('access.Customer', on_delete=models.CASCADE, related_name='resumes_manage')  # Cambiamos related_name
     first_name = models.CharField(max_length=255)
-    surname = models.CharField(max_length=255,default='')
+    surname = models.CharField(max_length=255, default='')
     birth_date = models.DateField(default="1900-01-01")
     email = models.EmailField()
     phone_number = models.CharField(max_length=20)
@@ -35,6 +33,6 @@ class Resume(models.Model):
     contact_info = models.CharField(max_length=255, default='')
 
 class Resume_Uploaded(models.Model):
-    customer = models.ForeignKey('access.Customer', on_delete=models.CASCADE, related_name='resumes_uploaded')
-    content= models.CharField(max_length=10000,null=True)
-    file =  models.FileField(upload_to='resume/')
+    customer = models.ForeignKey('access.Customer', on_delete=models.CASCADE, related_name='resumes_uploaded_manage')  # Cambiamos related_name
+    content = models.CharField(max_length=10000, null=True)
+    file = models.FileField(upload_to='resume/')
