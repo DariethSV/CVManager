@@ -131,5 +131,26 @@ if (!detect_form()) {
 
 
 
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === 'collectPageInfo') {
+        console.log("Mensaje recibido en content.js para recolectar información.");
 
+        const pageInfo = {
+            title: document.title,
+            url: window.location.href
+        };
+        saveAppliedPage(pageInfo.name_page, pageInfo.url_page, pageInfo.customer_email);
+        console.log('Información de la página recolectada:', pageInfo);
+        // Almacena la información en chrome.storage
+        chrome.storage.local.set({ pageInfo }, () => {
+            console.log('Información de la página almacenada:', pageInfo); // Este mensaje debería aparecer si el almacenamiento se ejecuta correctamente.
+        });
+        chrome.storage.local.set({ pageInfo }, () => {
+            chrome.storage.local.get('pageInfo', (result) => {
+                console.log('Verificación inmediata de datos en storage:', result.pageInfo);
+            });
+        });
+        sendResponse({ status: 'success', pageInfo });
+    }
+});
 

@@ -240,9 +240,32 @@ function log_out() {
 }
 
 // Función para crear hoja de vida
-document.getElementById('home_button').addEventListener('click', function(){
-    window.open('http://localhost:8000/resume/create_resume/', '_blank');
+document.getElementById('home_button').addEventListener('click', function() {
+    fetch('http://localhost:8000/resume/api/check_user_role/', {
+        method: 'GET',
+        credentials: 'include'  // Incluye las cookies para autenticación
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.role === 'admin') {
+            // Redirige a la página del administrador
+            window.open('http://localhost:8000/admin_dashboard/', '_blank'); 
+        } else if (data.role === 'specific_user') {
+            // Redirige a una página para el usuario específico
+            window.open('http://localhost:8000/admin_dashboard/', '_blank');  
+        } else {
+            // Redirige a la página regular
+            window.open('http://localhost:8000/resume/view_resume/', '_blank');
+        }
+    })
+    .catch(error => {
+        console.error('Error al verificar el rol del usuario:', error);
+        // Opcionalmente, redirige a la página regular en caso de error
+        window.open('http://localhost:8000/resume/view_resume/', '_blank');
+    });
 });
+
+
 // Función que envia el documento cargado a Django
 document.getElementById('upload_resume_input').addEventListener('change', function(event) {
     // El evento "change"  se dispara cuando el usuario cambia el valor de un input
@@ -423,6 +446,79 @@ document.getElementById('autocomplete_button').addEventListener('click', async f
         });
         
     }
+});
+
+
+function getUserEmail() {
+    return fetch('http://localhost:8000/resume/api/get_user_email/', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.email) {
+            return data.email;
+        } else {
+            console.error('Error al obtener el correo del usuario:', data);
+            return null;
+        }
+    })
+    .catch(error => {
+        console.error('Error en la solicitud de correo:', error);
+        return null;
+    });
+}
+
+
+document.getElementById('autocomplete_button').addEventListener('click', () => {
+    getUserEmail().then(customer_email => {
+        if (customer_email) {
+            const pageInfo = {
+                name_page: document.title,
+                url_page: window.location.href,
+                customer_email: customer_email  // Usa el correo obtenido
+            };
+
+            // Llama a saveAppliedPage con la información completa
+            saveAppliedPage(pageInfo.name_page, pageInfo.url_page, pageInfo.customer_email);
+        } else {
+            console.error('No se pudo obtener el correo del usuario autenticado.');
+        }
+    });
+});
+
+
+function saveAppliedPage(name_page, url_page, customer_email) {
+    fetch('http://localhost:8000/resume/api/save_applied_page/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            name_page: name_page,
+            url_page: url_page,
+            customer_email: customer_email  
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log('Página aplicada guardada con éxito:', data.applied_page_id);
+        } else {
+            console.error('Error al guardar la página aplicada:', data);
+        }
+    })
+    .catch(error => {
+        console.error('Error en la solicitud:', error);
+    });
+}
+
+
+
+chrome.storage.local.get('pageInfo', (result) => {
+    console.log('Datos almacenados en chrome.storage.local:', result.pageInfo);
 });
 
 
