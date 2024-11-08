@@ -1,9 +1,10 @@
 from itertools import chain
+import json
 from multiprocessing import Value
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from .models import *
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib import messages
@@ -155,29 +156,48 @@ def save_resume(request):
     
     pass
 
-def resume_list(request):
-    resumes = Resume.objects.filter(customer=request.user)
-    return render(request, 'show_resume.html', {'resumes': resumes})
-     
+def show_resumes(request):
+    resumes = Resume.objects.all()
+    uploaded_resumes = Resume_Uploaded.objects.all()
     
+    context = {
+        'resumes': resumes,
+        'uploaded_resumes': uploaded_resumes,
+    }
+    
+    return render(request, 'show_resume.html', context)
+
+     
+@login_required    
 def create_resume(request):
     return render(request, 'create_resume.html')
 
-def delete_resume(request, resume_id):
+@login_required
+def delete_resume(request, id):
     if request.method == "POST":
-        resume = get_object_or_404(Resume_Uploaded, id=resume_id)
+        resume = get_object_or_404(Resume, id=id)
         resume.delete()
-        return JsonResponse({'success': True})
-    return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
+        
+        return redirect('show_resume')  
+    return redirect('show_resume')  
 
+@login_required
+def delete_uploaded_resume(request, id):
+    if request.method == "POST":
+        resume = get_object_or_404(Resume_Uploaded, id=id)
+        resume.delete()
+        
+        return redirect('show_resume')  
+    return redirect('show_resume')  
+
+@login_required
 def edit_resume(request, id):
-    # Obtén el objeto Resume con el ID dado
     resume = get_object_or_404(Resume, id=id)
 
     if request.method == 'POST':
         # Lista de todos los campos que se pueden actualizar
         fields = [
-            'first_name', 'id_card', 'birth_date', 'phone_number', 'resume_email', 'country', 'city',
+            'first_name', 'surname', 'id_card', 'birth_date', 'phone_number', 'resume_email', 'country', 'city',
             'expected_salary', 'professional_summary', 'company_name', 'position', 'start_date', 'end_date',
             'description', 'degree', 'institution', 'start_date_education', 'end_date_education',
             'description_education', 'skill_name', 'proficiency_level', 'language', 'fluency', 'project_name',
@@ -201,7 +221,7 @@ def edit_resume(request, id):
     return render(request, 'edit_resume.html', context)
 
 
-
+@login_required
 def generate_pdf(request, resume_id):
     # Se obtienen los datos de la hoja de vida del modelo usando el `resume_id`
     resume = Resume.objects.get(id=resume_id)
@@ -244,7 +264,6 @@ def select_resume(request):
         print("¿Es uploaded?:", is_uploaded)
         print("¿uploaded type?:", type(is_uploaded))
 
-
         if is_uploaded:
             resume_uploaded = Resume_Uploaded.objects.filter(id=resume_id, customer=customer).first()
             print("Resume Uploaded encontrado:", resume_uploaded)
@@ -253,6 +272,8 @@ def select_resume(request):
                 customer.resume_uploaded_used = resume_uploaded
                 customer.save()
                 print("CUSTOMER después de asignar resume_uploaded_used:", customer.resume_uploaded_used)
+                # Agregar mensaje de éxito
+                messages.success(request, "Hoja de vida subida seleccionada con éxito.")
         else:
             resume = Resume.objects.filter(id=resume_id, customer=customer).first()
             print("Resume encontrado:", resume)
@@ -261,8 +282,11 @@ def select_resume(request):
                 customer.resume_uploaded_used = None
                 customer.save()
                 print("CUSTOMER después de asignar resume_used:", customer.resume_used)
-
-        return redirect('select_resume')
+                # Agregar mensaje de éxito
+                messages.success(request, "Hoja de vida seleccionada con éxito.")
+        
+        # Redirigir a `show_resume` en lugar de `select_resume`
+        return redirect('show_resume')
     
     else:
         print("Método GET recibido") 
@@ -272,9 +296,64 @@ def select_resume(request):
         ))
         print("Resumes obtenidos:", resumes)
         return render(request, 'select_resume.html', {'resumes': resumes})
+  
+     
+@login_required
+def get_user_email(request):
+    return JsonResponse({'email': request.user.email})
+
+    
+@csrf_exempt 
+def save_applied_page(request):
+    print("ENTROOOOOOOOOOO en save_applied_page")  # Verificar si la función se llama
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        customer_email = data.get('customer_email')
+        name_page = data.get('name_page')
+        url_page = data.get('url_page')
+
+        # Intenta obtener el cliente
+        try:
+            customer = Customer.objects.get(email=customer_email)
+            print("Cliente encontrado:", customer)
+        except Customer.DoesNotExist:
+            return JsonResponse({'error': 'No se encontró un cliente con el email proporcionado.'}, status=404)
+            print("No se encontró un cliente con el email proporcionado.")
+
+        # Crea la página aplicada
+        applied_page = Applied_pages.objects.create(
+            customer=customer,
+            name_page=name_page,
+            url_page=url_page
+        )
+        print("Página aplicada guardada:", applied_page)
+        return JsonResponse({'success': 'Página aplicada guardada', 'applied_page_id': applied_page.id})
+    return JsonResponse({'error': 'Método no permitido.'}, status=405)
 
 
+@login_required
+def check_user_role(request):
+    # Verifica si el usuario es un superusuario (administrador)
+    if request.user.is_superuser:
+        role = 'admin'
+    
+    # Verifica si el usuario es el usuario específico
+    elif request.user.username == 'admin@gmail.com':   
+        role = 'specific_user'
+    
+    # Si no es ni admin ni el usuario específico, es un usuario regular
+    else:
+        role = 'regular_user'
+    
+    # Retorna el rol en formato JSON para que la extensión lo use
+    return JsonResponse({'role': role})
 
 
-            
+#def admin_required(view_func):
+#    decorated_view_func = login_required(user_passes_test(lambda u: u.is_superuser)(view_func))
+#    return decorated_view_func
 
+#@admin_required
+def admin_dashboard(request):
+    visited_pages = Applied_pages.objects.all()  
+    return render(request, 'admin_dashboard.html', {'visited_pages': visited_pages})

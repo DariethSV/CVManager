@@ -1,3 +1,4 @@
+console.log("Archivo create_resume.js cargado");
 // Función para mostrar el modal de confirmación de eliminación
 function showConfirmationModal(resumeId) {
     window.selectedResumeId = resumeId;
@@ -5,25 +6,25 @@ function showConfirmationModal(resumeId) {
 
 // Función que se ejecuta al confirmar la eliminación
 function confirmDeletion(resumeId) {
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    console.log("Botón de confirmación presionado para ID:", resumeId);  
     
-    fetch(`/resume/${resumeId}/delete/`, {
+    fetch(`/delete_resume/${resumeId}/`, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrfToken
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json'
         }
     })
     .then(response => {
         if (response.ok) {
-            
-            alert("Resume deleted successfully");
-            location.reload(); 
+            console.log("Eliminación exitosa");  
+            location.reload();  // Recargar la página para ver los cambios
         } else {
-            alert("Error deleting resume");
+            alert("Error al eliminar la hoja de vida.");
+            console.error("Error en la respuesta del servidor:", response.status);
         }
     })
     .catch(error => {
-        console.error("Error:", error);
+        console.error("Error en la solicitud:", error);
     });
 }

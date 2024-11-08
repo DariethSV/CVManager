@@ -40,6 +40,8 @@ def match_inputs_info_resume_uploaded(request):
     customer = Customer.objects.get(email=user.email)
     resume = customer.resume_uploaded_used
     if request.method == 'POST':
+        matched_dict = {}
+        
         data = json.loads(request.body)
         labels = data['labels']
         print("LABELS: ",labels)

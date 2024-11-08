@@ -2,6 +2,18 @@
 {% load static %}
 
 {% block content %}
+
+{% if messages %}
+<div class="container my-4">
+    {% for message in messages %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
 <div class="container my-4">
     <h1 class="text-center mb-4">My Resumes</h1>
     
@@ -15,6 +27,7 @@
             </tr>
         </thead>
         <tbody>
+            <!-- Mostrar las hojas de vida regulares -->
             {% for resume in resumes %}
             <tr>
                 <td class="text-center">{{ resume.id }}</td>
@@ -26,17 +39,16 @@
                     <form action="{% url 'select_resume' %}" method="POST">
                         {% csrf_token %}
                         <input type="hidden" name="resume_id" value="{{ resume.id }}">
-                        <input type="hidden" name="uploaded" value="{{ resume.is_uploaded }}">
+                        <input type="hidden" name="uploaded" value="False">
                         <button type="submit" class="btn btn-primary">Select</button>
                     </form>
                     
-                    <!-- Botón y modal de confirmación de eliminación -->
-                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmationModal">
+                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmationModal-{{ resume.id }}">
                         Eliminar
                     </button>
                     
                     <!-- Modal de confirmación -->
-                    <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+                    <div class="modal fade" id="confirmationModal-{{ resume.id }}" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header">
@@ -48,24 +60,85 @@
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                    <button type="button" class="btn btn-danger" onclick="confirmDeletion({{ resume.id }})">Confirmar</button>
-                                    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+                                    
+                                    <form action="{% url 'delete_resume' resume.id %}" method="POST" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger">Confirmar</button>
+                                    </form>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </td>
             </tr>
-            {% empty %}
+            {% endfor %}
+            
+            <!-- Mostrar las hojas de vida subidas -->
+            {% for uploaded_resume in uploaded_resumes %}
+            <tr>
+                <td class="text-center">{{ uploaded_resume.id }}</td>
+                <td>{{ uploaded_resume.file.name }}</td>
+                <td class="text-center">{{ uploaded_resume.date_uploaded|date:"Y-m-d" }}</td>
+                <td class="text-center">
+                    <a href="{{ uploaded_resume.file.url }}" target="_blank" class="btn btn-info btn-sm">View</a>
+                    <form action="{% url 'select_resume' %}" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="resume_id" value="{{ uploaded_resume.id }}">
+                        <input type="hidden" name="uploaded" value="True">
+                        <button type="submit" class="btn btn-primary">Select</button>
+                    </form>
+                    
+                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmationModal-{{ uploaded_resume.id }}">
+                        Eliminar
+                    </button>
+                    
+                    <!-- Modal de confirmación para la hoja de vida subida -->
+                    <div class="modal fade" id="confirmationModal-{{ uploaded_resume.id }}" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="confirmationModalLabel">Confirmar Eliminación</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                                </div>
+                                <div class="modal-body">
+                                    ¿Estás seguro de que deseas eliminar este curriculum?
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    
+                                    <form action="{% url 'delete_uploaded_resume' uploaded_resume.id %}" method="POST" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger">Confirmar</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+            
+            {% if resumes.count == 0 and uploaded_resumes.count == 0 %}
             <tr>
                 <td colspan="4" class="text-center">No resumes found</td>
             </tr>
-            {% endfor %}
+            {% endif %}
         </tbody>
     </table>
 </div>
 
-<script src="{% static 'js/create_resume.js' %}"></script>
-
+<script>
+    
+    setTimeout(function() {
+        var alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function(alert) {
+            alert.classList.add('fade');
+            setTimeout(function() {
+                alert.classList.remove('show');
+                alert.remove(); 
+            }, 500); 
+        });
+    }, 5000); 
+</script>
 
 {% endblock content %}

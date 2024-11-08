@@ -45,3 +45,11 @@ class Resume_Uploaded(models.Model):
     customer = models.ForeignKey('access.Customer', on_delete=models.CASCADE, related_name='resumes_uploaded')
     content= models.CharField(max_length=10000,null=True)
     file =  models.FileField(upload_to='resume/')
+    date_uploaded = models.DateTimeField(auto_now_add=True, null=True)
+    
+class Applied_pages(models.Model):
+    customer = models.ForeignKey('access.Customer', on_delete=models.CASCADE, related_name='applied_pages')
+    user_email = models.CharField(max_length=255, default='')
+    name_page = models.CharField(max_length=255, default='')
+    url_page = models.CharField(max_length=255, default='')
+    date_created = models.DateTimeField(auto_now_add=True)

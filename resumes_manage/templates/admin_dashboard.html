@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Lista de Páginas Visitadas (Vista de Administrador)</h2>
+    {% if visited_pages %}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">Cliente</th>
+                    <th scope="col">Nombre de la Página</th>
+                    <th scope="col">URL</th>
+                    <th scope="col">Fecha de Visita</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for page in visited_pages %}
+                <tr>
+                    <td>{{ page.customer.customer }}</td> 
+                    <td>{{ page.name_page }}</td>
+                    <td><a href="{{ page.url_page }}" target="_blank">{{ page.url_page }}</a></td>
+                    <td>{{ page.date_created|date:"d/m/Y H:i" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No hay páginas visitadas registradas.</p>
+    {% endif %}
+</div>
+{% endblock %}
