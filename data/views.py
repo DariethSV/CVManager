@@ -2,6 +2,7 @@
 import os
 import json
 import re  # type: ignore
+from django.core.exceptions import ObjectDoesNotExist
 
 # Librerías de terceros (requieren instalación con pip)
 import PyPDF2  # type: ignore
@@ -39,68 +40,74 @@ nlp = spacy.load("es_core_news_sm")
 
 
 @csrf_exempt
-@login_required
 def strategy_function(request):
-    print("ENTROOOOOOOOOOO AL ESTRATEGY FUNCTION")
-    user = request.user
-    customer = Customer.objects.get(email=user.email)
-    print("CUSTOMER: ", customer.email)
-    if customer.resume_used:
-        print("RESUME: ", customer.resume_used.id)
-        return match_inputs_info_resume(request)
-    elif customer.resume_uploaded_used:
-        print("RESUME SUBIDO: ", customer.resume_uploaded_used.id)
-        return match_inputs_info_resume_uploaded(request)
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'User is not authenticated'}, status=401)
+
+    try:
+        print("ENTROOOOOOOOOOO AL ESTRATEGY FUNCTION")
+        user = request.user
+        customer = Customer.objects.get(email=user.email)
+        print("CUSTOMER: ", customer.email)
+        if customer.resume_used:
+            print("RESUME: ", customer.resume_used.id)
+            return match_inputs_info_resume(request)
+        elif customer.resume_uploaded_used:
+            print("RESUME SUBIDO: ", customer.resume_uploaded_used.id)
+            return match_inputs_info_resume_uploaded(request)
+    except Customer.DoesNotExist:
+        return JsonResponse({'error': 'Customer not found'}, status=404)
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        return JsonResponse({'error': f'Error procesando la solicitud: {str(e)}'}, status=500)
 
 @csrf_exempt
-@login_required
 def match_inputs_info_resume_uploaded(request):
-    user = request.user
-    customer = Customer.objects.get(email=user.email)
-    resume = customer.resume_uploaded_used
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        labels = data['labels']
-        print("LABELS: ",labels)
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'User is not authenticated'}, status=401)
 
-        prompt = f'''Recibirás una lista de labels de un formulario para aplicar a una oferta de empleo, empareja los términos de la Lista A con la información mejor relacionada del texto B. El resultado debe ser un diccionario en formato JSON donde cada término de la Lista A se asocie con el campo más adecuado del texto B.
+    try:
+        user = request.user
+        customer = Customer.objects.get(email=user.email)
+        resume = customer.resume_uploaded_used
+        if request.method == 'POST':
+            data = json.loads(request.body)
+            labels = data.get('labels', [])
+            print("LABELS: ", labels)
 
-        Lista A: {labels}
+            if not labels:
+                return JsonResponse({'error': 'No labels provided'}, status=400)
 
-        Lista B: {resume.content}
+            prompt = f'''Recibirás una lista de labels de un formulario para aplicar a una oferta de empleo...'''
 
-        El diccionario JSON el cual deberá ser compatible para usar la función json.loads() en python, debe tener la siguiente estructura: "Término de A": "información correspondiente de B". Solo incluye en el resultado aquellos términos que tengan una relación clara y precisa entre la lista A y el texto B. Si algún término de la Lista A no tiene una correspondencia clara en el texto B, no lo incluyas en el diccionario. Utiliza únicamente los términos proporcionados en las listas y asegúrate de que las asociaciones sean precisas y significativas.
+            response = client.chat.completions.create(
+                model="gemma2-9b-it",
+                temperature=0,
+                top_p=1,
+                messages=[{
+                    "role": "user",
+                    "content": prompt
+                }]
+            )
 
-        Responde únicamente con el diccionario JSON generado.'''
-        response = client.chat.completions.create(
-        model="gemma2-9b-it",
-        temperature=0,
-        top_p=1,
-        messages=[{
-            "role": "user",
-            "content": prompt
-        }]
-        )
-
-        content = response.choices[0].message.content
-        content = content.replace('`','')
-        content = content.replace('json','')
-        content = content.strip()
-        try:
+            content = response.choices[0].message.content
+            content = content.replace('`', '')
+            content = content.replace('json', '')
+            content = content.strip()
             matched_dict = json.loads(content)
-        except json.JSONDecodeError as e:
-            print("ERROR", e)
-        
-        print("DICCIONARIO: ",matched_dict)
-        print("=========================================================")
-
             
+            print("DICCIONARIO: ", matched_dict)
+            return JsonResponse({'success': 'Datos emparejados', 'matched_dict': matched_dict})
 
+        return JsonResponse({'error': 'Método no permitido.'}, status=405)
 
-        
-        return JsonResponse({'success': 'Datos emparejados', 'matched_dict': matched_dict})
-
-    return JsonResponse({'error': 'Método no permitido.'}, status=405)
+    except Customer.DoesNotExist:
+        return JsonResponse({'error': 'Customer not found'}, status=404)
+    except json.JSONDecodeError as e:
+        return JsonResponse({'error': f'Error en el formato JSON: {str(e)}'}, status=400)
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        return JsonResponse({'error': f'Error procesando la solicitud: {str(e)}'}, status=500)
 
 @csrf_exempt
 @login_required
@@ -225,13 +232,20 @@ def get_data(request):
         return JsonResponse({'error': 'No resume found'}, status=404)
 
 
+@csrf_exempt
 def check_customer_resume(request):
-    user = request.user
-    if user.is_authenticated and hasattr(user, "customer"):
-        has_resume = Resume.objects.filter(customer=user).exists()
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'User is not authenticated'}, status=401)
+
+    try:
+        # Filtrar usando el campo correcto: `user`
+        has_resume = Resume.objects.filter(user=request.user).exists()
         return JsonResponse({'has_resume': has_resume})
-    else:
-        return JsonResponse({'error': 'User is not a customer'}, status=400)
+    except ObjectDoesNotExist:
+        return JsonResponse({'error': 'Customer not found'}, status=404)
+    except Exception as e:
+        # Capturar cualquier otro error y devolver un mensaje detallado
+        return JsonResponse({'error': f'Error procesando la solicitud: {str(e)}'}, status=500)
 
 @csrf_exempt
 def upload_resume(request):
