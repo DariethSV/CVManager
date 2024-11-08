@@ -20,7 +20,7 @@ groq_api_key = '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'
 client = Groq(api_key=groq_api_key)
 
 @csrf_exempt
-@login_required
+
 def strategy_function(request):
     print("ENTROOOOOOOOOOO AL ESTRATEGY FUNCTION")
     user = request.user

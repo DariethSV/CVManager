@@ -155,10 +155,12 @@ def save_resume(request):
         return render(request, 'create_resume.html')
     
     pass
-
+     
+@login_required 
 def show_resumes(request):
-    resumes = Resume.objects.all()
-    uploaded_resumes = Resume_Uploaded.objects.all()
+    user = request.user
+    resumes = Resume.objects.filter(customer=user)
+    uploaded_resumes = Resume_Uploaded.objects.filter(customer=user)
     
     context = {
         'resumes': resumes,
@@ -318,8 +320,7 @@ def save_applied_page(request):
             print("Cliente encontrado:", customer)
         except Customer.DoesNotExist:
             return JsonResponse({'error': 'No se encontró un cliente con el email proporcionado.'}, status=404)
-            print("No se encontró un cliente con el email proporcionado.")
-
+            
         # Crea la página aplicada
         applied_page = Applied_pages.objects.create(
             customer=customer,
