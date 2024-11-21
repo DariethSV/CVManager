@@ -198,7 +198,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             const pageInfo = {
                 name_page: document.title,
                 url_page: window.location.href,
-                customer_email: customer_email  // Aquí podría ser una cadena vacía
+                customer_email: customer_email  
             };
 
             // Guarda la información en el servidor

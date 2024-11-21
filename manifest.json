@@ -4,11 +4,11 @@
     "version": "1.0",
     "description": "Una extensión para enviar datos a Django",
     "permissions": [
+        "action",
         "storage",
         "activeTab",
         "scripting",
-        "tabs",
-        "http://localhost:8000/"
+        "tabs"
     ],
     "host_permissions": [
         "http://localhost:8000/*",
