@@ -54,7 +54,7 @@ def login_user(request):
         if user is not None:
             login(request, user)
             if hasattr(user,"customer"):
-                return JsonResponse({'message': f'Bienvenido {user.name}','customer':'si'})
+                return JsonResponse({'message': f'Bienvenido {user.name}','customer':'si','email':email})
             else:
                 return  JsonResponse({'message': f'Bienvenido administrador {user.name}'})
         else:

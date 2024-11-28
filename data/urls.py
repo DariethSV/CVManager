@@ -11,6 +11,8 @@ urlpatterns = [
     path('match_inputs_info_resume/',views.match_inputs_info_resume, name="match_inputs_info_resume"), 
     path('strategy_function/',views.strategy_function, name="strategy_function"), 
     path('match_inputs_info_resume_uploaded/',views.match_inputs_info_resume_uploaded, name="match_inputs_info_resume_uploaded"), 
+    path('get_company_name/',views.get_company_name, name="get_company_name"), 
+
 
 ]
 

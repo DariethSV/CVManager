@@ -299,7 +299,8 @@ def select_resume(request):
         print("Resumes obtenidos:", resumes)
         return render(request, 'select_resume.html', {'resumes': resumes})
   
-     
+
+@csrf_exempt
 @login_required
 def get_user_email(request):
     return JsonResponse({'email': request.user.email})
