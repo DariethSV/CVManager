@@ -2,7 +2,12 @@
     "manifest_version": 3,
     "name": "CV Manager",
     "version": "1.0",
-    "description": "Una extensión para enviar datos a Django",
+    "description": "CV Manager es una extensión de navegador utilizada para autocompletar formularios de aplicación a empleos, en tres sencillos pasos: 1. Regístrate e inicia sesión, 2. Navega a la página con el formulario a completar, 3. Haz clic en el botón de autocompletar y listo.",
+    "icons": {
+        "16": "static/icons/CVManagerLogo16.png",
+        "48": "static/icons/CVManagerLogo48.png",
+        "128": "static/icons/CVManagerLogo128.png"
+    },
     "permissions": [
         "storage",
         "activeTab",

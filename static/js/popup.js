@@ -475,10 +475,8 @@ document.getElementById('autocomplete_button').addEventListener('click', () => {
         chrome.tabs.sendMessage(tabs[0].id, { action: "start_autocomplete", email:email }, (response) => {
             if (response && response.status === 'success') {
                 console.log('Información de la página recolectada y guardada con éxito:', response.pageInfo);
-                alert('Información de la página recolectada y guardada.');
             } else {
                 console.error('No se pudo recolectar la información de la página:', response ? response.message : "Respuesta nula");
-                alert('Error al recolectar la información de la página: ' + (response ? response.message : "Respuesta nula"));
             }
         });
     });
