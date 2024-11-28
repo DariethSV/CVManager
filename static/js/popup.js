@@ -203,6 +203,7 @@ document.getElementById('log_in_form').addEventListener('submit',  function(even
                         confirmButtonColor: '#038b71',
                     });
                     localStorage.setItem('user_logged_in', 'true');
+                    localStorage.setItem('email', data.email);
                     chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
                         chrome.tabs.sendMessage(tabs[0].id, { type: "set_login_status", status: true });
                     });
@@ -464,8 +465,14 @@ document.getElementById('autocomplete_button').addEventListener('click', async f
 
 // Evento para el botón de autocompletar
 document.getElementById('autocomplete_button').addEventListener('click', () => {
+    const email = localStorage.getItem('email'); // Asegúrate de que la clave sea la correcta
+
+    if (!email) {
+        alert('No se encontró un correo electrónico en el localStorage.');
+        return;
+    }
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        chrome.tabs.sendMessage(tabs[0].id, { action: "start_autocomplete" }, (response) => {
+        chrome.tabs.sendMessage(tabs[0].id, { action: "start_autocomplete", email:email }, (response) => {
             if (response && response.status === 'success') {
                 console.log('Información de la página recolectada y guardada con éxito:', response.pageInfo);
                 alert('Información de la página recolectada y guardada.');

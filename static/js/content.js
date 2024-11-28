@@ -188,17 +188,42 @@ function getUserEmail() {
 
 
 
+async function get_company_name(html){
+    try {
+        const response = await fetch('http://localhost:8000/resume/api/get_company_name/', {
+            method: 'POST', 
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include',
+            body: JSON.stringify({ html: html }), // Enviar el HTML
+        });
 
-// Escucha el mensaje de autocompletar desde el popup
+        if (!response.ok) {
+            throw new Error(`Error en la respuesta: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("COMPANY NAME: ", data.company_name);
+        return data.company_name;
+    } catch (error) {
+        console.error('Error al obtener el nombre de la empresa:', error);
+        return null; // Devolver `null` si ocurre un error
+    }
+}
+
+
+// Detecta cuando el formulario fue enviado 
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === "start_autocomplete") {
         console.log("Mensaje recibido en content.js para iniciar autocompletado.");
 
-        getUserEmail().then(customer_email => {
+        
             const pageInfo = {
                 name_page: document.title,
                 url_page: window.location.href,
-                customer_email: customer_email  // Aquí podría ser una cadena vacía
+                customer_email: message.email  // Aquí podría ser una cadena vacía
             };
 
             // Guarda la información en el servidor
@@ -211,7 +236,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
             // Envía la respuesta de éxito al popup
             sendResponse({ status: 'success', pageInfo });
-        });
 
         // Indica que la respuesta será enviada de manera asincrónica
         return true;
