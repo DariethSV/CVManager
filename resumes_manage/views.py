@@ -225,20 +225,77 @@ def edit_resume(request, id):
 
 @login_required
 def generate_pdf(request, resume_id):
-    # Se obtienen los datos de la hoja de vida del modelo usando el `resume_id`
-    resume = Resume.objects.get(id=resume_id)
-    
-    # Se configura la respuesta para enviar un archivo PDF
+    # Obtener los datos de la hoja de vida del modelo usando el `resume_id`
+    try:
+        resume = Resume.objects.get(id=resume_id)
+    except Resume.DoesNotExist:
+        return HttpResponse("Resume not found.", status=404)
+
+    # Configurar la respuesta HTTP para enviar un archivo PDF
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = f'inline; filename="resume_{resume_id}.pdf"'
-    
-    # Se crea un canvas para el PDF
-    p = canvas.Canvas(response, pagesize=letter)
-    p.drawString(100, 750, f"Resume of {resume.first_name}")
-    p.drawString(100, 730, f"ID: {resume.id_card}")
-    p.drawString(100, 710, f"Email: {resume.resume_email}")
-    p.drawString(100, 690, f"Phone: {resume.phone_number}")
 
+    # Crear el PDF
+    p = canvas.Canvas(response, pagesize=letter)
+    y = 750  # Coordenada vertical inicial
+
+    # Agregar título
+    p.setFont("Helvetica-Bold", 16)
+    p.drawString(100, y, f"Resume of {resume.first_name} {resume.surname}")
+    y -= 30
+
+    # Configurar fuente para el contenido
+    p.setFont("Helvetica", 12)
+
+    # Iterar sobre los campos del modelo
+    fields = [
+        ("ID Card", resume.id_card),
+        ("Birth Date", resume.birth_date),
+        ("Gender", resume.gender),
+        ("Email", resume.resume_email),
+        ("Phone Number", resume.phone_number),
+        ("Country", resume.country),
+        ("City", resume.city),
+        ("Expected Salary", resume.expected_salary),
+        ("Professional Summary", resume.professional_summary),
+        ("Company Name", resume.company_name),
+        ("Position", resume.position),
+        ("Start Date", resume.start_date),
+        ("End Date", resume.end_date),
+        ("Description", resume.description),
+        ("Degree", resume.degree),
+        ("Institution", resume.institution),
+        ("Start Date Education", resume.start_date_education),
+        ("End Date Education", resume.end_date_education),
+        ("Description Education", resume.description_education),
+        ("Skill Name", resume.skill_name),
+        ("Proficiency Level", resume.proficiency_level),
+        ("Language", resume.language),
+        ("Fluency", resume.fluency),
+        ("Project Name", resume.project_name),
+        ("Description Project", resume.description_project),
+        ("Technologies Used", resume.technologies_used),
+        ("Title", resume.title),
+        ("Institution Certification", resume.institution_certification),
+        ("Date Obtained", resume.date_obtained),
+        ("Reference Name", resume.reference_name),
+        ("Relationship", resume.relationship),
+        ("Contact Info", resume.contact_info),
+        ("Date Created", resume.date_created),
+        ("Date Updated", resume.date_updated),
+    ]
+
+    # Agregar los campos al PDF
+    for field_name, field_value in fields:
+        p.drawString(100, y, f"{field_name}: {field_value}")
+        y -= 20
+        # Saltar a una nueva página si la coordenada Y es muy baja
+        if y < 50:
+            p.showPage()
+            p.setFont("Helvetica", 12)
+            y = 750
+
+    # Finalizar el PDF
     p.showPage()
     p.save()
 
@@ -299,7 +356,8 @@ def select_resume(request):
         print("Resumes obtenidos:", resumes)
         return render(request, 'select_resume.html', {'resumes': resumes})
   
-     
+
+@csrf_exempt
 @login_required
 def get_user_email(request):
     return JsonResponse({'email': request.user.email})

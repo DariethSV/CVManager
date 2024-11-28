@@ -22,7 +22,6 @@ client = Groq(api_key=groq_api_key)
 @csrf_exempt
 
 def strategy_function(request):
-    print("ENTROOOOOOOOOOO AL ESTRATEGY FUNCTION")
     user = request.user
     customer = Customer.objects.get(email=user.email)
     print("CUSTOMER: ", customer.email)
@@ -241,3 +240,25 @@ def extract_content_pdf(file_path):
     
     return content
     
+def get_company_name(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        html = data['html']
+        print("HTML: ",html[:200])
+        prompt = f'''Examina la siguiente estructura HTML, correspondiente a una página de aplicación de empleo. Identifica y proporciona únicamente el nombre de la empresa a la que pertenece la página. Este es el HTML: {html[:5000]}
+
+        Responde únicamente con el nombre de la empresa, sin incluir texto adicional.
+        '''
+        response = client.chat.completions.create(
+        model="gemma2-9b-it",
+        temperature=0,
+        top_p=1,
+        messages=[{
+            "role": "user",
+            "content": prompt
+        }]
+        )
+
+        content = response.choices[0].message.content
+        print(content)
+        return JsonResponse({'company_name':content})
