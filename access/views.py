@@ -10,7 +10,7 @@ from django.contrib.auth import authenticate, login, logout
 def register_user(request):
     if not Admin_Custom_User.objects.exists():
         admin = Admin_Custom_User.objects.create(
-            email="darieth.s.v@gmail.com",
+            email="cvmanager@gmail.com",
             name="CVManager Admin",
             password=make_password("1234cvmanager")
         )
